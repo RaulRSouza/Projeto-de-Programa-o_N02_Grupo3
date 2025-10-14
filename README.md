@@ -14,7 +14,7 @@ O projeto foi desenvolvido utilizando apenas recursos do **Java Development Kit 
 * **`java.time`**: Utilizado para manipulação eficiente de datas e horários.
 * **`java.util`**: Utilizado para estruturas de dados (Listas e Coleções).
 
-**(Nota: Futuras implementações está aba será atualizada.)**
+**(Nota: Conforme o escopo, futuras implementações serão realizadas.)**
 
 ## Instruções de Execução
 
@@ -26,12 +26,10 @@ Para rodar a aplicação:
     ```
 2.  **Abra na IDE:** Importe o projeto no IntelliJ IDEA ou Eclipse.
 3.  **Compile e Execute:** A IDE deve compilar e rodar o projeto automaticamente a partir da classe principal.
-4.  **Execução Manual (Linha de Comando):**
-    * Compile: `javac -d . src/main/java/br/com/unit/verideia/gerenciamentoAulas/*.java`
-    * Execute: `java br.com.unit.verideia.gerenciamentoAulas.Principal`
-
-**(A classe principal para execução é `br.com.unit.verideia.gerenciamentoAulas.Principal`.)**
-
+    **(Nota: A classe main está apenas com HelloWorld, no futuro uma classe de testes será implementada)**  
+    
+    
+    
 ## Responsabilidades de Cada Integrante
 
 
