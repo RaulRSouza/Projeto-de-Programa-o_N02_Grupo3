@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste de API - Gerenciamento de Aulas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #2f3640;
+      text-align: center;
+    }
+    section {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 800px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input, select {
+      margin: 5px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #273c75;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #40739e;
+    }
+    pre {
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 Teste de API - Gerenciamento de Aulas</h1>
+
+  <section>
+    <h2>🎓 Inscrições</h2>
+    <div>
+      <button onclick="listar('inscricoes')">Listar Inscrições</button>
+      <input type="number" id="idInscricao" placeholder="ID da inscrição">
+      <button onclick="buscarPorId('inscricoes')">Buscar por ID</button>
+    </div>
+    <div>
+      <input type="number" id="idAluno" placeholder="ID do Aluno">
+      <input type="number" id="idAula" placeholder="ID da Aula">
+      <button onclick="criarInscricao()">Criar Inscrição</button>
+    </div>
+    <div>
+      <input type="number" id="idCancelar" placeholder="ID p/ cancelar">
+      <button onclick="cancelarInscricao()">Cancelar</button>
+      <input type="number" id="idDeletar" placeholder="ID p/ deletar">
+      <button onclick="deletar('inscricoes')">Deletar</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>👤 Usuários</h2>
+    <div>
+      <button onclick="listar('usuarios')">Listar Usuários</button>
+      <input type="number" id="idUsuario" placeholder="ID do Usuário">
+      <button onclick="buscarPorId('usuarios')">Buscar por ID</button>
+    </div>
+    <div>
+      <input id="nomeUsuario" placeholder="Nome">
+      <input id="emailUsuario" placeholder="Email">
+      <input id="senhaUsuario" placeholder="Senha">
+      <button onclick="criarUsuario()">Criar Usuário</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>📍 Locais</h2>
+    <div>
+      <button onclick="listar('locais')">Listar Locais</button>
+      <input type="number" id="idLocal" placeholder="ID do Local">
+      <button onclick="buscarPorId('locais')">Buscar por ID</button>
+    </div>
+    <div>
+      <input id="nomeLocal" placeholder="Nome">
+      <input id="enderecoLocal" placeholder="Endereço">
+      <input type="number" id="capacidadeLocal" placeholder="Capacidade">
+      <button onclick="criarLocal()">Criar Local</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>👨‍💼 Administradores</h2>
+    <div>
+      <button onclick="listar('administradores')">Listar Administradores</button>
+      <input type="number" id="idAdm" placeholder="ID do Adm">
+      <button onclick="buscarPorId('administradores')">Buscar por ID</button>
+    </div>
+    <div>
+      <input id="nomeAdm" placeholder="Nome">
+      <input id="emailAdm" placeholder="Email">
+      <input id="senhaAdm" placeholder="Senha">
+      <button onclick="criarAdministrador()">Criar Administrador</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>🧾 Resposta</h2>
+    <pre id="saida">Aguardando requisições...</pre>
+  </section>
+
+  <script>
+    const API = "http://localhost:8080/api";
+
+    async function listar(entidade) {
+      const res = await fetch(`${API}/${entidade}`);
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function buscarPorId(entidade) {
+      const id = document.getElementById(`id${capitalize(entidade)}`)?.value;
+      if (!id) return alert("Informe o ID");
+      const res = await fetch(`${API}/${entidade}/${id}`);
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function deletar(entidade) {
+      const id = document.getElementById(`idDeletar`).value;
+      if (!id) return alert("Informe o ID");
+      const res = await fetch(`${API}/${entidade}/${id}`, { method: "DELETE" });
+      document.getElementById("saida").textContent = await res.text();
+    }
+
+    async function criarInscricao() {
+      const alunoId = document.getElementById("idAluno").value;
+      const aulaId = document.getElementById("idAula").value;
+      if (!alunoId || !aulaId) return alert("Preencha aluno e aula");
+
+      const body = {
+        aluno: { id: parseInt(alunoId) },
+        aula: { id: parseInt(aulaId) }
+      };
+
+      const res = await fetch(`${API}/inscricoes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function cancelarInscricao() {
+      const id = document.getElementById("idCancelar").value;
+      if (!id) return alert("Informe o ID");
+      const res = await fetch(`${API}/inscricoes/${id}/cancelar`, { method: "PATCH" });
+      document.getElementById("saida").textContent = await res.text();
+    }
+
+    async function criarUsuario() {
+      const nome = document.getElementById("nomeUsuario").value;
+      const email = document.getElementById("emailUsuario").value;
+      const senha = document.getElementById("senhaUsuario").value;
+      const res = await fetch(`${API}/usuarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email, senha })
+      });
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function criarLocal() {
+      const nome = document.getElementById("nomeLocal").value;
+      const endereco = document.getElementById("enderecoLocal").value;
+      const capacidade = parseInt(document.getElementById("capacidadeLocal").value);
+      const res = await fetch(`${API}/locais`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, endereco, capacidade })
+      });
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    async function criarAdministrador() {
+      const nome = document.getElementById("nomeAdm").value;
+      const email = document.getElementById("emailAdm").value;
+      const senha = document.getElementById("senhaAdm").value;
+      const res = await fetch(`${API}/administradores`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, email, senha })
+      });
+      document.getElementById("saida").textContent = JSON.stringify(await res.json(), null, 2);
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+
+</body>
+</html>
