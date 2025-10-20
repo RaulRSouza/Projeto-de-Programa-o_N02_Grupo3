@@ -11,9 +11,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Aplicação JavaFX integrada ao Spring Boot.
- * Ponto de entrada para a interface gráfica do sistema.
- *
  * @author Grupo 3 - Sistema de Gerenciamento de Aulas de Véridia
  */
 public class JavaFXApplication extends Application {
@@ -22,7 +19,6 @@ public class JavaFXApplication extends Application {
 
     @Override
     public void init() {
-        // Inicializa o contexto Spring Boot
         this.context = new SpringApplicationBuilder()
                 .sources(ProjetoDeProgramacaoN02Grupo3Application.class)
                 .run();
@@ -31,21 +27,16 @@ public class JavaFXApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Carrega o FXML principal
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/fxml/MainView.fxml")
             );
             loader.setControllerFactory(context::getBean);
 
             Parent root = loader.load();
-
-            // Configura a cena
             Scene scene = new Scene(root, 1280, 720);
             scene.getStylesheets().add(
                 getClass().getResource("/css/style.css").toExternalForm()
             );
-
-            // Configura o palco
             primaryStage.setTitle("Sistema de Gerenciamento de Aulas - Véridia");
             primaryStage.setScene(scene);
             primaryStage.setMaximized(true);
@@ -59,7 +50,6 @@ public class JavaFXApplication extends Application {
 
     @Override
     public void stop() {
-        // Fecha o contexto Spring ao fechar a aplicação
         if (context != null) {
             context.close();
         }
