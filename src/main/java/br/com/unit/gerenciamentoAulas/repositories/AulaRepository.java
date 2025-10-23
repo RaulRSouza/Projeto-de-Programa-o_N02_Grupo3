@@ -48,6 +48,16 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
         @Param("inicio") LocalDateTime inicio,
         @Param("fim") LocalDateTime fim
     );
+
+    @Query("SELECT COUNT(a) > 0 FROM Aula a WHERE a.instrutor = :instrutor " +
+           "AND a.status != 'CANCELADA' AND a.id <> :aulaId " +
+           "AND ((a.dataHoraInicio < :fim AND a.dataHoraFim > :inicio))")
+    boolean existsConflitoInstrutorExcluindoAula(
+        @Param("instrutor") Instrutor instrutor,
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fim") LocalDateTime fim,
+        @Param("aulaId") Long aulaId
+    );
     
     @Query("SELECT COUNT(a) > 0 FROM Aula a WHERE a.local = :local " +
            "AND a.status != 'CANCELADA' " +
@@ -56,6 +66,16 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
         @Param("local") Local local,
         @Param("inicio") LocalDateTime inicio,
         @Param("fim") LocalDateTime fim
+    );
+
+    @Query("SELECT COUNT(a) > 0 FROM Aula a WHERE a.local = :local " +
+           "AND a.status != 'CANCELADA' AND a.id <> :aulaId " +
+           "AND ((a.dataHoraInicio < :fim AND a.dataHoraFim > :inicio))")
+    boolean existsConflitoLocalExcluindoAula(
+        @Param("local") Local local,
+        @Param("inicio") LocalDateTime inicio,
+        @Param("fim") LocalDateTime fim,
+        @Param("aulaId") Long aulaId
     );
     
     @Query("SELECT a FROM Aula a WHERE a.curso.id = :cursoId " +

@@ -5,13 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -56,6 +61,21 @@ public class Aula {
     
     @OneToMany(mappedBy = "aula", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inscricao> inscricoes;
+
+    @Column(name = "material_url", length = 500)
+    private String materialComplementarUrl;
+
+    @Column(name = "material_nome_arquivo", length = 255)
+    private String materialComplementarNomeArquivo;
+
+    @Column(name = "material_tipo", length = 100)
+    private String materialComplementarTipo;
+
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @Column(name = "material_arquivo")
+    private byte[] materialComplementarArquivo;
 
     public Aula() {
         this.inscricoes = new ArrayList<>();
@@ -162,6 +182,45 @@ public class Aula {
 
     public void setInscricoes(List<Inscricao> inscricoes) {
         this.inscricoes = inscricoes;
+    }
+
+    public String getMaterialComplementarUrl() {
+        return materialComplementarUrl;
+    }
+
+    public void setMaterialComplementarUrl(String materialComplementarUrl) {
+        this.materialComplementarUrl = materialComplementarUrl;
+    }
+
+    public String getMaterialComplementarNomeArquivo() {
+        return materialComplementarNomeArquivo;
+    }
+
+    public void setMaterialComplementarNomeArquivo(String materialComplementarNomeArquivo) {
+        this.materialComplementarNomeArquivo = materialComplementarNomeArquivo;
+    }
+
+    public String getMaterialComplementarTipo() {
+        return materialComplementarTipo;
+    }
+
+    public void setMaterialComplementarTipo(String materialComplementarTipo) {
+        this.materialComplementarTipo = materialComplementarTipo;
+    }
+
+    public byte[] getMaterialComplementarArquivo() {
+        return materialComplementarArquivo;
+    }
+
+    public void setMaterialComplementarArquivo(byte[] materialComplementarArquivo) {
+        this.materialComplementarArquivo = materialComplementarArquivo;
+    }
+
+    public void limparMaterialComplementar() {
+        this.materialComplementarArquivo = null;
+        this.materialComplementarNomeArquivo = null;
+        this.materialComplementarTipo = null;
+        this.materialComplementarUrl = null;
     }
 
     public void adicionarInscricao(Inscricao inscricao) {
