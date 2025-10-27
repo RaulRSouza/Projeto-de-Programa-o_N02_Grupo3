@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
-import br.com.unit.gerenciamentoAulas.services.AulaService;
+import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
