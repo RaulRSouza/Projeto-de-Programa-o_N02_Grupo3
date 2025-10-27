@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Central de Testes - Gerenciamento de Aulas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 16px;
+        }
+        h1 {
+            text-align: center;
+        }
+        section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            margin: 16px auto;
+            max-width: 760px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        }
+        label {
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 8px;
+        }
+        input, textarea, button {
+            font: inherit;
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 6px;
+            border: 1px solid #d5dae5;
+            box-sizing: border-box;
+        }
+        button {
+            background: #1d4ed8;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        small {
+            color: #6b7280;
+            display: block;
+            margin-top: 4px;
+        }
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            min-height: 160px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .actions button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<h1>Central de Testes</h1>
+
+<section>
+    <h2>Configuração</h2>
+    <label for="baseUrl">Base da API</label>
+    <input id="baseUrl" value="http://localhost:8080/api">
+    <small>Mantenha o backend rodando com <code>mvn spring-boot:run</code>.</small>
+</section>
+
+<section>
+    <h2>Aulas</h2>
+    <div class="actions">
+        <button onclick="listar('aulas')">Listar aulas</button>
+        <button onclick="listar('aulas/futuras')">Futuras</button>
+        <button onclick="listar('aulas/disponiveis')">Com vagas</button>
+    </div>
+
+    <label for="aulaId">ID da aula</label>
+    <input id="aulaId" type="number" placeholder="ex: 1">
+    <div class="actions">
+        <button onclick="buscarAula()">Buscar aula</button>
+        <button onclick="cancelarAula()">Cancelar aula</button>
+    </div>
+
+    <h3>Reagendar aula</h3>
+    <label for="reagendarInicio">Nova data/hora início</label>
+    <input id="reagendarInicio" type="datetime-local">
+    <label for="reagendarFim">Nova data/hora fim</label>
+    <input id="reagendarFim" type="datetime-local">
+    <label for="reagendarLocal">Novo local (opcional)</label>
+    <input id="reagendarLocal" type="number" placeholder="ID do local">
+    <label for="reagendarVagas">Novas vagas (opcional)</label>
+    <input id="reagendarVagas" type="number">
+    <label for="reagendarObs">Observações (opcional)</label>
+    <textarea id="reagendarObs" rows="2"></textarea>
+    <button onclick="reagendarAula()">Reagendar</button>
+
+    <h3>Material complementar</h3>
+    <label for="materialLink">URL do material</label>
+    <input id="materialLink" type="url" placeholder="https://...">
+    <div class="actions">
+        <button onclick="definirLink()">Salvar link</button>
+        <button onclick="removerMaterial()">Remover material</button>
+        <button onclick="baixarMaterial()">Baixar PDF</button>
+    </div>
+    <label for="materialArquivo">Upload de PDF</label>
+    <input id="materialArquivo" type="file" accept="application/pdf">
+    <button onclick="uploadMaterial()">Enviar PDF</button>
+</section>
+
+<section>
+    <h2>Locais</h2>
+    <div class="actions">
+        <button onclick="listar('locais')">Listar locais</button>
+    </div>
+    <label for="localId">ID do local</label>
+    <input id="localId" type="number" placeholder="ex: 1">
+    <div class="actions">
+        <button onclick="buscarLocal()">Buscar local</button>
+    </div>
+
+    <h3>Verificar disponibilidade</h3>
+    <label for="dispInicio">Início</label>
+    <input id="dispInicio" type="datetime-local">
+    <label for="dispFim">Fim</label>
+    <input id="dispFim" type="datetime-local">
+    <button onclick="verificarDisponibilidade()">Verificar</button>
+</section>
+
+<section>
+    <h2>Notificações</h2>
+    <label for="alunoId">ID do aluno</label>
+    <input id="alunoId" type="number" placeholder="ex: 5">
+    <div class="actions">
+        <button onclick="listarNotificacoes()">Listar notificações</button>
+        <button onclick="contarNaoLidas()">Contar não lidas</button>
+    </div>
+
+    <label for="notificacaoId">ID da notificação</label>
+    <input id="notificacaoId" type="number" placeholder="ex: 12">
+    <button onclick="marcarComoLida()">Marcar como lida</button>
+</section>
+
+<section>
+    <h2>Saída</h2>
+    <pre id="saida">Aguardando requisições...</pre>
+</section>
+
+<script>
+    const getBase = () => document.getElementById('baseUrl').value.trim();
+
+    const mostrar = async (response) => {
+        const saida = document.getElementById('saida');
+        if (response.headers.get('content-type')?.includes('application/json')) {
+            const json = await response.json();
+            saida.textContent = JSON.stringify(json, null, 2);
+        } else {
+            saida.textContent = await response.text();
+        }
+    };
+
+    const listar = async (rota) => {
+        const resp = await fetch(`${getBase()}/${rota}`);
+        await mostrar(resp);
+    };
+
+    const buscarAula = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        if (!id) return alert('Informe o ID da aula.');
+        const resp = await fetch(`${getBase()}/aulas/${id}`);
+        await mostrar(resp);
+    };
+
+    const cancelarAula = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        if (!id) return alert('Informe o ID da aula.');
+        const resp = await fetch(`${getBase()}/aulas/${id}/cancelar`, { method: 'PATCH' });
+        await mostrar(resp);
+    };
+
+    const reagendarAula = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        if (!id) return alert('Informe o ID da aula.');
+
+        const body = {};
+        const inicio = document.getElementById('reagendarInicio').value;
+        const fim = document.getElementById('reagendarFim').value;
+        const local = document.getElementById('reagendarLocal').value;
+        const vagas = document.getElementById('reagendarVagas').value;
+        const obs = document.getElementById('reagendarObs').value;
+
+        if (inicio) body.novaDataHoraInicio = new Date(inicio).toISOString();
+        if (fim) body.novaDataHoraFim = new Date(fim).toISOString();
+        if (local) body.novoLocalId = parseInt(local, 10);
+        if (vagas) body.novasVagasTotais = parseInt(vagas, 10);
+        if (obs) body.observacoes = obs;
+
+        const resp = await fetch(`${getBase()}/aulas/${id}/reagendar`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        await mostrar(resp);
+    };
+
+    const definirLink = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        const url = document.getElementById('materialLink').value.trim();
+        if (!id || !url) return alert('Informe aula e link.');
+        const resp = await fetch(`${getBase()}/aulas/${id}/material/link`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        await mostrar(resp);
+    };
+
+    const uploadMaterial = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        const arquivo = document.getElementById('materialArquivo').files[0];
+        if (!id || !arquivo) return alert('Informe a aula e selecione um PDF.');
+        const form = new FormData();
+        form.append('arquivo', arquivo);
+        const resp = await fetch(`${getBase()}/aulas/${id}/material/upload`, {
+            method: 'POST',
+            body: form
+        });
+        await mostrar(resp);
+    };
+
+    const baixarMaterial = () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        if (!id) return alert('Informe o ID da aula.');
+        window.open(`${getBase()}/aulas/${id}/material/download`, '_blank');
+    };
+
+    const removerMaterial = async () => {
+        const id = parseInt(document.getElementById('aulaId').value, 10);
+        if (!id) return alert('Informe o ID da aula.');
+        const resp = await fetch(`${getBase()}/aulas/${id}/material`, { method: 'DELETE' });
+        await mostrar(resp);
+    };
+
+    const listarNotificacoes = async () => {
+        const aluno = parseInt(document.getElementById('alunoId').value, 10);
+        if (!aluno) return alert('Informe o ID do aluno.');
+        const resp = await fetch(`${getBase()}/notificacoes/aluno/${aluno}`);
+        await mostrar(resp);
+    };
+
+    const contarNaoLidas = async () => {
+        const aluno = parseInt(document.getElementById('alunoId').value, 10);
+        if (!aluno) return alert('Informe o ID do aluno.');
+        const resp = await fetch(`${getBase()}/notificacoes/aluno/${aluno}/nao-lidas`);
+        await mostrar(resp);
+    };
+
+    const marcarComoLida = async () => {
+        const id = parseInt(document.getElementById('notificacaoId').value, 10);
+        if (!id) return alert('Informe o ID da notificação.');
+        const resp = await fetch(`${getBase()}/notificacoes/${id}/ler`, { method: 'PATCH' });
+        document.getElementById('saida').textContent = resp.status === 204
+            ? 'Notificação marcada como lida.'
+            : await resp.text();
+    };
+
+    const buscarLocal = async () => {
+        const id = parseInt(document.getElementById('localId').value, 10);
+        if (!id) return alert('Informe o ID do local.');
+        const resp = await fetch(`${getBase()}/locais/${id}`);
+        await mostrar(resp);
+    };
+
+    const verificarDisponibilidade = async () => {
+        const id = parseInt(document.getElementById('localId').value, 10);
+        const inicio = document.getElementById('dispInicio').value;
+        const fim = document.getElementById('dispFim').value;
+        if (!id || !inicio || !fim) return alert('Informe local, início e fim.');
+        const params = new URLSearchParams({
+            inicio: new Date(inicio).toISOString(),
+            fim: new Date(fim).toISOString()
+        });
+        const resp = await fetch(`${getBase()}/locais/${id}/disponibilidade?${params.toString()}`);
+        await mostrar(resp);
+    };
+</script>
+</body>
+</html>

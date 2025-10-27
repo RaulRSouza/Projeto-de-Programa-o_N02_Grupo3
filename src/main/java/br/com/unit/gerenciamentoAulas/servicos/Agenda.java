@@ -114,12 +114,14 @@ public class Agenda {
                 .average()
                 .orElse(0);
 
+        int ocupacaoPercentual = (int) Math.round(ocupacaoMedia * 100);
+
         return new AgendaResumo(
                 total,
                 (int) agendadas,
                 (int) canceladas,
                 (int) disponiveis,
-                Math.round(ocupacaoMedia * 100)
+                ocupacaoPercentual
         );
     }
 
