@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.unit.gerenciamentoAulas.dtos.AulaReagendamentoRequest;
+import br.com.unit.gerenciamentoAulas.dtos.ReagendamentoRequest;
 import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarLinkRequest;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
@@ -162,7 +162,7 @@ public class AulaController {
 
 
     @PatchMapping("/{id}/reagendar")
-    public ResponseEntity<?> reagendar(@PathVariable Long id, @RequestBody AulaReagendamentoRequest request) {
+    public ResponseEntity<?> reagendar(@PathVariable Long id, @RequestBody ReagendamentoRequest request) {
         if (request == null) {
             return ResponseEntity.badRequest().body("Dados de reagendamento sao obrigatorios");
         }

@@ -2,13 +2,15 @@ package br.com.unit.gerenciamentoAulas.dtos;
 
 import java.time.LocalDateTime;
 
-public class AulaReagendamentoRequest {
-
+public class ReagendamentoRequest {
     private LocalDateTime novaDataHoraInicio;
     private LocalDateTime novaDataHoraFim;
     private Long novoLocalId;
+    private Long novoInstrutorId;
     private Integer novasVagasTotais;
     private String observacoes;
+
+    public ReagendamentoRequest() {}
 
     public LocalDateTime getNovaDataHoraInicio() {
         return novaDataHoraInicio;
@@ -32,6 +34,14 @@ public class AulaReagendamentoRequest {
 
     public void setNovoLocalId(Long novoLocalId) {
         this.novoLocalId = novoLocalId;
+    }
+
+    public Long getNovoInstrutorId() {
+        return novoInstrutorId;
+    }
+
+    public void setNovoInstrutorId(Long novoInstrutorId) {
+        this.novoInstrutorId = novoInstrutorId;
     }
 
     public Integer getNovasVagasTotais() {
