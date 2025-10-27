@@ -15,10 +15,6 @@ import br.com.unit.gerenciamentoAulas.entidades.Aluno;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 
-/**
- * Orquestra os fluxos internos da agenda do sistema contemplando
- * perspectivas de administrador, instrutor e aluno.
- */
 public class Agenda {
     private final GestaoAula gestaoAula;
     private final Inscricao servicoInscricao;
@@ -30,9 +26,6 @@ public class Agenda {
         this.autenticacao = autenticacao;
     }
 
-    /**
-     * Fluxo principal da agenda. Retorna a visão adequada ao perfil logado.
-     */
     public List<Aula> listarAgendaPrincipal() {
         if (!autenticacao.isUsuarioLogado()) {
             System.out.println("Nenhum usuário autenticado. Agenda vazia.");
@@ -62,9 +55,6 @@ public class Agenda {
         return Collections.emptyList();
     }
 
-    /**
-     * Lista aulas do dia para o usuário corrente.
-     */
     public List<Aula> listarAgendaDoDia(LocalDate data) {
         if (data == null) {
             return Collections.emptyList();
@@ -75,9 +65,6 @@ public class Agenda {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Gera uma visão semanal considerando segunda-feira como início.
-     */
     public List<Aula> listarAgendaSemanal(LocalDate referencia) {
         if (referencia == null) {
             referencia = LocalDate.now();
@@ -89,9 +76,6 @@ public class Agenda {
         return listarPorPeriodo(inicioSemana.atStartOfDay(), fimSemana.atTime(LocalTime.MAX));
     }
 
-    /**
-     * Fluxo administrativo para visão consolidada da agenda.
-     */
     public AgendaResumo gerarResumoAdministrativo() {
         List<Aula> todas = gestaoAula.listarTodasAulas();
         if (todas.isEmpty()) {
@@ -119,13 +103,10 @@ public class Agenda {
                 (int) agendadas,
                 (int) canceladas,
                 (int) disponiveis,
-                Math.round(ocupacaoMedia * 100)
+                (int) Math.round(ocupacaoMedia * 100)
         );
     }
 
-    /**
-     * Fluxo de apoio ao modo aluno – aulas disponíveis sem conflito com agenda atual.
-     */
     public List<Aula> listarAulasDisponiveisParaAlunoLogado() {
         if (!autenticacao.isAluno()) {
             return Collections.emptyList();
@@ -136,9 +117,6 @@ public class Agenda {
                 .orElse(Collections.emptyList());
     }
 
-    /**
-     * Apoio ao modo instrutor – agenda restrita a um período.
-     */
     public List<Aula> listarAgendaInstrutorPeriodo(Long instrutorId, LocalDateTime inicio, LocalDateTime fim) {
         if (instrutorId == null) {
             return Collections.emptyList();
@@ -160,9 +138,6 @@ public class Agenda {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Apoio ao modo administrador – agrupamento por curso.
-     */
     public Map<String, Long> agruparPorCurso() {
         return gestaoAula.listarTodasAulas().stream()
                 .collect(Collectors.groupingBy(
@@ -171,9 +146,6 @@ public class Agenda {
                 ));
     }
 
-    /**
-     * Recupera aulas em um intervalo independente do perfil.
-     */
     public List<Aula> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         List<Aula> todas = gestaoAula.listarTodasAulas();
 
@@ -195,9 +167,6 @@ public class Agenda {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Estrutura simplificada de dashboard para camada de apresentação.
-     */
     public static class AgendaResumo {
         private final int total;
         private final int agendadas;
