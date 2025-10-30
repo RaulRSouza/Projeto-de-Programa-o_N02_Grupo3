@@ -1,0 +1,71 @@
+.fade-in {
+    -fx-opacity: 1;
+}
+
+.slide-in {
+    -fx-translate-x: 0;
+}
+
+.scale-in {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+}
+
+.hover-lift {
+    -fx-cursor: hand;
+}
+
+.hover-lift:hover {
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);
+}
+
+.hover-scale {
+    -fx-cursor: hand;
+}
+
+.hover-scale:hover {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.hover-glow {
+    -fx-cursor: hand;
+}
+
+.hover-glow:hover {
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.4), 20, 0, 0, 0);
+}
+
+.smooth-transition {
+}
+
+.loading-spinner {
+    -fx-progress-color: -fx-accent;
+    -fx-background-color: transparent;
+}
+
+.loading-spinner .percentage {
+    -fx-fill: transparent;
+}
+
+.skeleton {
+    -fx-background-color: linear-gradient(
+        to right,
+        -fx-gray-200 0%,
+        -fx-gray-300 50%,
+        -fx-gray-200 100%
+    );
+    -fx-background-radius: -fx-radius-md;
+}
+
+.page-transition {
+}
+
+.transitioning-disabled {
+    -fx-opacity: 0.5;
+}
+
+.modal-backdrop {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+}

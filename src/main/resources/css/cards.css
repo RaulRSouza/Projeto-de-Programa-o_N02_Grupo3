@@ -1,0 +1,370 @@
+.stat-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 24;
+    -fx-spacing: 16;
+    -fx-cursor: hand;
+}
+
+.stat-card:hover {
+    -fx-effect: -fx-shadow-md;
+    -fx-translate-y: -2;
+}
+
+.stat-card-header {
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.stat-card-icon {
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-alignment: center;
+}
+
+.stat-card-icon.primary {
+    -fx-background-color: rgba(33, 150, 243, 0.1);
+}
+
+.stat-card-icon.primary .icon {
+    -fx-text-fill: -fx-accent;
+}
+
+.stat-card-icon.success {
+    -fx-background-color: rgba(0, 200, 83, 0.1);
+}
+
+.stat-card-icon.success .icon {
+    -fx-text-fill: -fx-success;
+}
+
+.stat-card-icon.warning {
+    -fx-background-color: rgba(255, 152, 0, 0.1);
+}
+
+.stat-card-icon.warning .icon {
+    -fx-text-fill: -fx-warning;
+}
+
+.stat-card-icon.danger {
+    -fx-background-color: rgba(244, 67, 54, 0.1);
+}
+
+.stat-card-icon.danger .icon {
+    -fx-text-fill: -fx-danger;
+}
+
+.stat-card-icon.info {
+    -fx-background-color: rgba(33, 150, 243, 0.1);
+}
+
+.stat-card-icon.info .icon {
+    -fx-text-fill: -fx-info;
+}
+
+.stat-icon {
+    -fx-font-size: 24px;
+}
+
+.stat-card-body {
+    -fx-spacing: 4;
+}
+
+.stat-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 500;
+}
+
+.stat-value {
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.stat-card-footer {
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+    -fx-padding: 12 0 0 0;
+    -fx-border-color: -fx-border-color transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+.stat-change {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-spacing: 4;
+}
+
+.stat-change.positive {
+    -fx-text-fill: -fx-success;
+}
+
+.stat-change.negative {
+    -fx-text-fill: -fx-danger;
+}
+
+.stat-change.neutral {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.stat-period {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-tertiary;
+}
+
+.chart-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 24;
+}
+
+.chart-card-header {
+    -fx-spacing: 8;
+    -fx-padding: 0 0 20 0;
+    -fx-border-color: transparent transparent -fx-border-color transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.chart-card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.chart-card-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.chart-card-body {
+    -fx-padding: 20 0 0 0;
+}
+
+.info-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 20;
+    -fx-spacing: 12;
+    -fx-border-color: -fx-border-color;
+    -fx-border-width: 1;
+    -fx-border-radius: -fx-radius-lg;
+}
+
+.info-card.primary {
+    -fx-border-color: -fx-accent;
+    -fx-background-color: rgba(33, 150, 243, 0.02);
+}
+
+.info-card.success {
+    -fx-border-color: -fx-success;
+    -fx-background-color: rgba(0, 200, 83, 0.02);
+}
+
+.info-card.warning {
+    -fx-border-color: -fx-warning;
+    -fx-background-color: rgba(255, 152, 0, 0.02);
+}
+
+.info-card.danger {
+    -fx-border-color: -fx-danger;
+    -fx-background-color: rgba(244, 67, 54, 0.02);
+}
+
+.info-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.info-card-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-wrap-text: true;
+}
+
+.activity-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 24;
+}
+
+.activity-item {
+    -fx-spacing: 12;
+    -fx-padding: 16;
+    -fx-background-color: -fx-bg-secondary;
+    -fx-background-radius: -fx-radius-md;
+}
+
+.activity-item:hover {
+    -fx-background-color: -fx-gray-200;
+    -fx-cursor: hand;
+}
+
+.activity-icon {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-background-color: -fx-gray-100;
+    -fx-background-radius: 50%;
+    -fx-alignment: center;
+}
+
+.activity-content {
+    -fx-spacing: 4;
+}
+
+.activity-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.activity-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.activity-time {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-tertiary;
+}
+
+.quick-action-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 20;
+    -fx-spacing: 12;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.quick-action-card:hover {
+    -fx-effect: -fx-shadow-md;
+    -fx-background-color: -fx-bg-secondary;
+}
+
+.quick-action-icon {
+    -fx-font-size: 32px;
+    -fx-text-fill: -fx-accent;
+}
+
+.quick-action-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+    -fx-text-alignment: center;
+}
+
+.summary-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 24;
+    -fx-spacing: 20;
+}
+
+.summary-row {
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+    -fx-padding: 12 0;
+    -fx-border-color: transparent transparent -fx-border-color transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.summary-row:last-child {
+    -fx-border-width: 0;
+}
+
+.summary-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.summary-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.dashboard-grid {
+    -fx-hgap: 24;
+    -fx-vgap: 24;
+    -fx-padding: 0;
+}
+
+.metrics-section {
+    -fx-spacing: 24;
+    -fx-padding: 0 0 32 0;
+}
+
+.metrics-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.progress-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-lg;
+    -fx-effect: -fx-shadow-sm;
+    -fx-padding: 24;
+    -fx-spacing: 16;
+}
+
+.progress-header {
+    -fx-spacing: 8;
+}
+
+.progress-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.progress-percentage {
+    -fx-font-size: 24px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-accent;
+}
+
+.progress-bar-custom {
+    -fx-min-height: 12px;
+    -fx-background-color: -fx-gray-200;
+    -fx-background-radius: -fx-radius-full;
+}
+
+.progress-bar-custom .bar {
+    -fx-background-color: -fx-accent;
+    -fx-background-radius: -fx-radius-full;
+    -fx-background-insets: 0;
+}
+
+.compact-card {
+    -fx-background-color: -fx-bg;
+    -fx-background-radius: -fx-radius-md;
+    -fx-effect: -fx-shadow-xs;
+    -fx-padding: 16;
+    -fx-spacing: 8;
+}
+
+.compact-card-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 500;
+}
+
+.compact-card-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-text-primary;
+}
