@@ -1,6 +1,5 @@
 package br.com.unit.gerenciamentoAulas.ui;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -21,6 +19,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 @Controller
 public class MainController {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Autowired
     private AulaService aulaService;
@@ -50,24 +50,12 @@ public class MainController {
     private TableColumn<AulaTableRow, String> colStatus;
 
     @FXML
-    private Button btnAtualizar;
-
-    @FXML
-    private Button btnFuturas;
-
-    @FXML
-    private Button btnDisponiveis;
-
-    @FXML
-    private Button btnTodas;
-
-    @FXML
     private Label lblTotal;
 
     @FXML
     private Label lblStatus;
 
-    private ObservableList<AulaTableRow> aulasData = FXCollections.observableArrayList();
+    private final ObservableList<AulaTableRow> aulasData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -78,9 +66,7 @@ public class MainController {
         colDataHora.setCellValueFactory(new PropertyValueFactory<>("dataHora"));
         colVagas.setCellValueFactory(new PropertyValueFactory<>("vagas"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-
         tabelaAulas.setItems(aulasData);
-
         carregarTodasAulas();
     }
 
@@ -91,24 +77,12 @@ public class MainController {
 
     @FXML
     private void handleFuturas() {
-        try {
-            List<Aula> aulas = aulaService.listarAulasFuturas();
-            atualizarTabela(aulas);
-            lblStatus.setText("Exibindo: Aulas Futuras");
-        } catch (Exception e) {
-            mostrarErro("Erro ao carregar aulas futuras", e.getMessage());
-        }
+        carregarAulas("Exibindo: Aulas Futuras", aulaService::listarAulasFuturas);
     }
 
     @FXML
     private void handleDisponiveis() {
-        try {
-            List<Aula> aulas = aulaService.listarAulasDisponiveis();
-            atualizarTabela(aulas);
-            lblStatus.setText("Exibindo: Aulas com Vagas Disponíveis");
-        } catch (Exception e) {
-            mostrarErro("Erro ao carregar aulas disponíveis", e.getMessage());
-        }
+        carregarAulas("Exibindo: Aulas com Vagas Disponíveis", aulaService::listarAulasDisponiveis);
     }
 
     @FXML
@@ -117,10 +91,13 @@ public class MainController {
     }
 
     private void carregarTodasAulas() {
+        carregarAulas("Exibindo: Todas as Aulas", aulaService::listarTodas);
+    }
+
+    private void carregarAulas(String status, SupplierChecked supplier) {
         try {
-            List<Aula> aulas = aulaService.listarTodas();
-            atualizarTabela(aulas);
-            lblStatus.setText("Exibindo: Todas as Aulas");
+            atualizarTabela(supplier.get());
+            lblStatus.setText(status);
         } catch (Exception e) {
             mostrarErro("Erro ao carregar aulas", e.getMessage());
         }
@@ -128,20 +105,15 @@ public class MainController {
 
     private void atualizarTabela(List<Aula> aulas) {
         aulasData.clear();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-        for (Aula aula : aulas) {
-            aulasData.add(new AulaTableRow(
+        aulas.forEach(aula -> aulasData.add(new AulaTableRow(
                 aula.getId(),
                 aula.getCurso().getNome(),
                 aula.getInstrutor().getNome(),
                 aula.getLocal().getNome(),
-                aula.getDataHoraInicio().format(formatter),
+                aula.getDataHoraInicio().format(FORMATTER),
                 aula.getVagasDisponiveis() + "/" + aula.getVagasTotais(),
                 aula.getStatus()
-            ));
-        }
-
+        )));
         lblTotal.setText("Total: " + aulas.size() + " aula(s)");
     }
 
@@ -163,7 +135,7 @@ public class MainController {
         private final String status;
 
         public AulaTableRow(Long id, String curso, String instrutor, String local,
-                           String dataHora, String vagas, String status) {
+                            String dataHora, String vagas, String status) {
             this.id = id;
             this.curso = curso;
             this.instrutor = instrutor;
@@ -180,5 +152,10 @@ public class MainController {
         public String getDataHora() { return dataHora; }
         public String getVagas() { return vagas; }
         public String getStatus() { return status; }
+    }
+
+    @FunctionalInterface
+    private interface SupplierChecked {
+        List<Aula> get() throws Exception;
     }
 }
