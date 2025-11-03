@@ -36,6 +36,7 @@ import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
 import br.com.unit.gerenciamentoAulas.servicos.NotificacaoService;
+import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
 
 @RestController
 @RequestMapping("/api/aulas")
@@ -56,6 +57,9 @@ public class AulaController {
 
     @Autowired
     private NotificacaoService notificacaoService;
+
+    @Autowired
+    private CsvExportService csvExportService;
 
     @GetMapping
     public ResponseEntity<List<Aula>> listarTodas() {
@@ -410,6 +414,24 @@ public class AulaController {
                     return ResponseEntity.ok(aulas);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/curso/{cursoId}/exportar-csv")
+    public ResponseEntity<String> exportarAulasPorCursoCsv(@PathVariable Long cursoId) {
+
+        Curso curso = cursoRepository.findById(cursoId)
+                .orElseThrow(() -> new RuntimeException("Curso nao encontrado com ID: " + cursoId));
+
+        List<Aula> aulas = aulaRepository.findByCurso(curso);
+
+        String csvData = csvExportService.exportAulasToCsv(aulas);
+
+        HttpHeaders headers = new HttpHeaders();
+        String nomeArquivo = "aulas_curso_" + curso.getId() + ".csv";
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nomeArquivo);
+        headers.add(HttpHeaders.CONTENT_TYPE, "text/csv; charset=utf-8"); // Garante a codificação correta
+
+        return new ResponseEntity<>(csvData, headers, HttpStatus.OK);
     }
 
     @GetMapping("/instrutor/{instrutorId}")
