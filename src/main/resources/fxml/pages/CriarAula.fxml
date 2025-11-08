@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.CriarAulaController"
+            prefWidth="620" prefHeight="680">
+
+    <center>
+        <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Agendar Nova Aula" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="22"/>
+                    </font>
+                </Label>
+                <Label text="Defina curso, instrutor, local e horários para disponibilizar a aula aos alunos."
+                       styleClass="text-muted" wrapText="true"/>
+            </VBox>
+
+            <GridPane hgap="18" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Título da aula*" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="tituloField" promptText="Ex.: Introdução ao Spring Boot"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Descrição" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextArea fx:id="descricaoArea" promptText="Resumo do conteúdo a ser abordado"
+                          prefRowCount="3" wrapText="true"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Curso*" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="cursoComboBox" promptText="Selecione o curso"
+                          GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Instrutor*" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="instrutorComboBox" promptText="Selecione o instrutor"
+                          GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Local*" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="localComboBox" promptText="Selecione o local"
+                          GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Início*" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                    <DatePicker fx:id="dataInicioPicker" promptText="Data"/>
+                    <TextField fx:id="horaInicioField" promptText="HH:mm" prefWidth="90"/>
+                </HBox>
+
+                <Label text="Término*" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <HBox spacing="10" GridPane.rowIndex="6" GridPane.columnIndex="1">
+                    <DatePicker fx:id="dataFimPicker" promptText="Data"/>
+                    <TextField fx:id="horaFimField" promptText="HH:mm" prefWidth="90"/>
+                </HBox>
+
+                <Label text="Vagas totais*" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+                <Spinner fx:id="vagasSpinner" editable="true"
+                         GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+                <Label text="Observações" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+                <TextArea fx:id="observacoesArea" prefRowCount="3" wrapText="true"
+                          promptText="Informações adicionais para os participantes"
+                          GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button fx:id="cancelarButton" text="Cancelar" onAction="#cancelar"
+                        styleClass="btn-secondary"/>
+                <Button fx:id="salvarButton" text="Salvar Aula" onAction="#salvarAula"
+                        styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
