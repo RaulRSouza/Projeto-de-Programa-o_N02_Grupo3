@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.GerenciarAulasController"
+      spacing="20" styleClass="page-container">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="📚 Gerenciamento de Aulas" styleClass="page-title">
+            <font><Font name="System Bold" size="26"/></font>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnNova" text="➕ Nova Aula" onAction="#handleNova" styleClass="btn-primary btn-large"/>
+    </HBox>
+
+    <!-- Filtros -->
+    <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
+        <Label text="Filtrar:" styleClass="filter-label"/>
+        <Button text="📋 Todas" onAction="#handleTodas" styleClass="btn-filter"/>
+        <Button text="📅 Futuras" onAction="#handleFuturas" styleClass="btn-filter"/>
+        <Button text="💺 Disponíveis" onAction="#handleDisponiveis" styleClass="btn-filter"/>
+        <Button text="🚫 Canceladas" onAction="#handleCanceladas" styleClass="btn-filter"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnAtualizar" text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- Tabela -->
+    <TableView fx:id="tabelaAulas" VBox.vgrow="ALWAYS" styleClass="modern-table">
+        <columns>
+            <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+            <TableColumn fx:id="colTitulo" text="Título" prefWidth="200"/>
+            <TableColumn fx:id="colCurso" text="Curso" prefWidth="180"/>
+            <TableColumn fx:id="colInstrutor" text="Instrutor" prefWidth="150"/>
+            <TableColumn fx:id="colLocal" text="Local" prefWidth="130"/>
+            <TableColumn fx:id="colDataInicio" text="Início" prefWidth="140"/>
+            <TableColumn fx:id="colDataFim" text="Fim" prefWidth="140"/>
+            <TableColumn fx:id="colVagas" text="Vagas" prefWidth="90"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="110"/>
+            <TableColumn fx:id="colAlertas" text="Alertas" prefWidth="140"/>
+            <TableColumn fx:id="colAcoes" text="Ações" prefWidth="200"/>
+        </columns>
+    </TableView>
+
+    <!-- Footer -->
+    <HBox alignment="CENTER_LEFT" spacing="15" styleClass="footer-info">
+        <Label fx:id="lblTotal" text="Total: 0 aula(s)" styleClass="info-label">
+            <font><Font name="System Bold" size="14"/></font>
+        </Label>
+        <Label fx:id="lblAlertasVisuais" text="" visible="false" managed="false"
+               style="-fx-text-fill: #92400e; -fx-background-color: #ffedd5; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="📊 Exportar CSV" onAction="#handleExportarCSV" styleClass="btn-secondary"/>
+    </HBox>
+
+</VBox>

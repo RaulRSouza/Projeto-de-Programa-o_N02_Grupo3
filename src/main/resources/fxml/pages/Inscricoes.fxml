@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.InscricoesController"
+      spacing="20" styleClass="page-container">
+
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="👥 Gerenciamento de Inscrições" styleClass="page-title">
+            <font>
+                <Font name="System Bold" size="26"/>
+            </font>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="novaInscricaoBtn" text="➕ Nova Inscrição"
+                onAction="#handleNovaInscricao" styleClass="btn-primary btn-large"/>
+        <Button text="⟳ Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
+        <Button fx:id="editarBtn" text="✏️ Editar" onAction="#handleEditar"
+                styleClass="btn-secondary" disable="true"/>
+        <Button fx:id="excluirBtn" text="🗑️ Excluir" onAction="#handleExcluir"
+                styleClass="btn-secondary" disable="true"/>
+    </HBox>
+
+    <Label fx:id="lblFlash" text="" visible="false" managed="false"
+           style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-padding: 8 16; -fx-background-radius: 8; -fx-font-weight: bold;"/>
+
+    <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
+        <Label text="Pesquisar:" styleClass="filter-label"/>
+        <TextField fx:id="pesquisaField" promptText="Aluno, curso ou status..."
+                   HBox.hgrow="ALWAYS"/>
+        <Button text="Buscar" onAction="#handlePesquisar" styleClass="btn-primary"/>
+        <Button text="Limpar" onAction="#handleLimparPesquisa" styleClass="btn-secondary"/>
+    </HBox>
+
+    <TableView fx:id="inscricoesTable" VBox.vgrow="ALWAYS" styleClass="modern-table">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="70"/>
+            <TableColumn fx:id="alunoColumn" text="Aluno" prefWidth="220"/>
+            <TableColumn fx:id="aulaColumn" text="Aula" prefWidth="240"/>
+            <TableColumn fx:id="dataInscricaoColumn" text="Data de Inscrição" prefWidth="180"/>
+            <TableColumn fx:id="statusColumn" text="Status" prefWidth="140"/>
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER_LEFT" spacing="12" styleClass="footer-info">
+        <Label text="Selecione uma inscrição para editar ou remover" styleClass="text-muted"/>
+    </HBox>
+
+</VBox>

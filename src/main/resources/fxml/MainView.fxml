@@ -11,74 +11,145 @@
 
     <top>
         <VBox styleClass="header">
-            <HBox alignment="CENTER" spacing="10">
-                <Label text="🎓 Sistema de Gerenciamento de Aulas - Véridia" styleClass="title">
-                    <font>
-                        <Font name="System Bold" size="28"/>
-                    </font>
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <padding>
+                    <Insets top="20" right="30" bottom="20" left="30"/>
+                </padding>
+                <Label text="🎓 Véridia" styleClass="logo">
+                    <font><Font name="System Bold" size="32"/></font>
                 </Label>
+                <Separator orientation="VERTICAL"/>
+                <VBox spacing="2">
+                    <Label text="Sistema de Gerenciamento de Aulas" styleClass="title">
+                        <font><Font name="System Bold" size="22"/></font>
+                    </Label>
+                    <Label text="Plataforma Educacional Integrada" styleClass="subtitle">
+                        <font><Font size="14"/></font>
+                    </Label>
+                </VBox>
             </HBox>
-            <HBox.margin>
-                <Insets top="20" bottom="20"/>
-            </HBox.margin>
         </VBox>
     </top>
 
-    <center>
-        <VBox spacing="15" styleClass="content">
+    <left>
+        <VBox styleClass="sidebar" spacing="10">
             <padding>
-                <Insets top="20" right="30" bottom="20" left="30"/>
+                <Insets top="20" right="15" bottom="20" left="15"/>
             </padding>
-
-            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar">
-                <Button fx:id="btnAtualizar" text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-primary"/>
-                <Button fx:id="btnTodas" text="📋 Todas" onAction="#handleTodas" styleClass="btn-secondary"/>
-                <Button fx:id="btnFuturas" text="📅 Futuras" onAction="#handleFuturas" styleClass="btn-secondary"/>
-                <Button fx:id="btnDisponiveis" text="💺 Disponíveis" onAction="#handleDisponiveis" styleClass="btn-secondary"/>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <Label fx:id="lblStatus" text="Exibindo: Todas as Aulas" styleClass="status-label">
-                    <font>
-                        <Font name="System Bold" size="14"/>
-                    </font>
-                </Label>
-            </HBox>
-
-            <TableView fx:id="tabelaAulas" VBox.vgrow="ALWAYS" styleClass="table-view">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60" styleClass="table-column-id"/>
-                    <TableColumn fx:id="colCurso" text="Curso" prefWidth="280" styleClass="table-column"/>
-                    <TableColumn fx:id="colInstrutor" text="Instrutor" prefWidth="200" styleClass="table-column"/>
-                    <TableColumn fx:id="colLocal" text="Local" prefWidth="220" styleClass="table-column"/>
-                    <TableColumn fx:id="colDataHora" text="Data/Hora" prefWidth="150" styleClass="table-column"/>
-                    <TableColumn fx:id="colVagas" text="Vagas" prefWidth="100" styleClass="table-column"/>
-                    <TableColumn fx:id="colStatus" text="Status" prefWidth="120" styleClass="table-column-status"/>
-                </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                </columnResizePolicy>
-            </TableView>
-
-            <HBox alignment="CENTER_LEFT" spacing="10" styleClass="footer">
-                <Label fx:id="lblTotal" text="Total: 0 aula(s)" styleClass="total-label">
-                    <font>
-                        <Font name="System Bold" size="14"/>
-                    </font>
-                </Label>
-            </HBox>
+            
+            <Label text="NAVEGAÇÃO" styleClass="sidebar-header">
+                <font><Font name="System Bold" size="12"/></font>
+            </Label>
+            
+            <Button fx:id="btnDashboard" text="📊 Dashboard" onAction="#handleDashboard" 
+                    styleClass="sidebar-btn,sidebar-btn-active" maxWidth="Infinity"/>
+            <Button text="📚 Gerenciar Aulas" onAction="#handleGerenciarAulas" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="🎓 Cursos" onAction="#handleCursos" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="👨‍🏫 Instrutores" onAction="#handleInstrutores" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="📍 Locais" onAction="#handleLocais" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="👥 Inscrições" onAction="#handleInscricoes" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
+            
+            <Separator/>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <Button text="⚙️ Configurações" onAction="#handleConfiguracoes" styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="🚪 Sair" onAction="#handleSair" styleClass="sidebar-btn-danger" maxWidth="Infinity"/>
         </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area">
+            <VBox spacing="25" styleClass="dashboard-content">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30"/>
+                </padding>
+
+                <Label text="📊 Dashboard - Visão Geral" styleClass="page-title">
+                    <font><Font name="System Bold" size="26"/></font>
+                </Label>
+
+                <!-- Cards de Estatísticas -->
+                <GridPane hgap="20" vgap="20">
+                    <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                        <Label text="📚 Total de Aulas" styleClass="stat-title">
+                            <font><Font size="14"/></font>
+                        </Label>
+                        <Label fx:id="lblTotalAulas" text="0" styleClass="stat-value">
+                            <font><Font name="System Bold" size="36"/></font>
+                        </Label>
+                    </VBox>
+
+                    <VBox styleClass="stat-card stat-card-success" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                        <Label text="📅 Próximas Aulas" styleClass="stat-title">
+                            <font><Font size="14"/></font>
+                        </Label>
+                        <Label fx:id="lblProximasAulas" text="0" styleClass="stat-value">
+                            <font><Font name="System Bold" size="36"/></font>
+                        </Label>
+                    </VBox>
+
+                    <VBox styleClass="stat-card stat-card-info" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                        <Label text="💺 Vagas Disponíveis" styleClass="stat-title">
+                            <font><Font size="14"/></font>
+                        </Label>
+                        <Label fx:id="lblVagasDisponiveis" text="0" styleClass="stat-value">
+                            <font><Font name="System Bold" size="36"/></font>
+                        </Label>
+                    </VBox>
+                </GridPane>
+
+                <!-- Aulas Recentes -->
+                <VBox spacing="15" VBox.vgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="📋 Aulas Recentes" styleClass="section-title">
+                            <font><Font name="System Bold" size="18"/></font>
+                        </Label>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnAtualizar" text="🔄 Atualizar" onAction="#handleAtualizar" 
+                                styleClass="btn-secondary"/>
+                    </HBox>
+
+                    <Label fx:id="lblFlash" text="" visible="false" managed="false"
+                           style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-padding: 6 14; -fx-background-radius: 8; -fx-font-weight: bold;"/>
+
+                    <TableView fx:id="tabelaAulas" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                            <TableColumn fx:id="colCurso" text="Curso" prefWidth="220"/>
+                            <TableColumn fx:id="colInstrutor" text="Instrutor" prefWidth="180"/>
+                            <TableColumn fx:id="colLocal" text="Local" prefWidth="160"/>
+                            <TableColumn fx:id="colDataHora" text="Data/Hora" prefWidth="140"/>
+                            <TableColumn fx:id="colVagas" text="Vagas" prefWidth="100"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="110"/>
+                        </columns>
+                    </TableView>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label fx:id="lblTotal" text="Total: 0 aula(s)" styleClass="info-label">
+                            <font><Font name="System Bold" size="14"/></font>
+                        </Label>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </StackPane>
     </center>
 
     <bottom>
-        <HBox alignment="CENTER" styleClass="bottom-bar">
+        <HBox alignment="CENTER" styleClass="footer-bar">
             <padding>
-                <Insets top="10" right="20" bottom="10" left="20"/>
+                <Insets top="12" right="20" bottom="12" left="20"/>
             </padding>
-            <Label text="Sistema de Gerenciamento de Aulas © 2025 - Véridia" styleClass="footer-text">
-                <font>
-                    <Font size="12"/>
-                </font>
+            <Label text="Sistema de Gerenciamento de Aulas © 2025 - Véridia | Grupo 3" styleClass="footer-text">
+                <font><Font size="12"/></font>
             </Label>
         </HBox>
     </bottom>

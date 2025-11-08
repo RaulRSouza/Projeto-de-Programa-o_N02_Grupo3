@@ -23,6 +23,10 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
     List<Aula> findByInstrutor(Instrutor instrutor);
     
     List<Aula> findByLocal(Local local);
+
+    long countByCursoId(Long cursoId);
+    long countByInstrutorId(Long instrutorId);
+    long countByLocalId(Long localId);
     
     @Query("SELECT a FROM Aula a WHERE a.dataHoraInicio >= :inicio " +
            "AND a.dataHoraInicio <= :fim ORDER BY a.dataHoraInicio")

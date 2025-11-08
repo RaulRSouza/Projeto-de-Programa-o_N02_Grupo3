@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.InstrutoresController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent;">
+
+    <content>
+        <VBox spacing="20" styleClass="page-container">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="👨‍🏫 Cadastro de Instrutores" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="26"/>
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
+                <Button text="➕ Novo Instrutor" onAction="#handleNovo" styleClass="btn-primary btn-large"/>
+            </HBox>
+
+            <Label fx:id="lblFlash" text="" visible="false" managed="false"
+                   style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-padding: 8 16; -fx-background-radius: 8; -fx-font-weight: bold;"/>
+
+            <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
+                <Label text="🔍 Buscar:" styleClass="filter-label"/>
+                <TextField fx:id="txtBusca" promptText="Nome, especialidade ou registro..."
+                           HBox.hgrow="ALWAYS"/>
+                <Button text="Filtrar" onAction="#handleBuscar" styleClass="btn-primary"/>
+                <Button text="Limpar" onAction="#handleLimpar" styleClass="btn-secondary"/>
+            </HBox>
+
+            <GridPane hgap="20" vgap="20">
+                <VBox styleClass="stat-card" GridPane.columnIndex="0">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    <Label text="👨‍🏫 Instrutores" styleClass="stat-title"/>
+                    <Label fx:id="lblTotalInstrutores" text="0" styleClass="stat-value"/>
+                </VBox>
+
+                <VBox styleClass="stat-card stat-card-success" GridPane.columnIndex="1">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    <Label text="📚 Especialidades" styleClass="stat-title"/>
+                    <Label fx:id="lblEspecialidades" text="0" styleClass="stat-value"/>
+                </VBox>
+            </GridPane>
+
+            <TableView fx:id="tabelaInstrutores" VBox.vgrow="ALWAYS" styleClass="modern-table">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="70"/>
+                    <TableColumn fx:id="colNome" text="Nome" prefWidth="220"/>
+                    <TableColumn fx:id="colEmail" text="E-mail" prefWidth="220"/>
+                    <TableColumn fx:id="colEspecialidade" text="Especialidade" prefWidth="180"/>
+                    <TableColumn fx:id="colRegistro" text="Registro" prefWidth="120"/>
+                    <TableColumn fx:id="colTelefone" text="Telefone" prefWidth="140"/>
+                    <TableColumn fx:id="colAcoes" text="Ações" prefWidth="180"/>
+                </columns>
+            </TableView>
+
+            <HBox alignment="CENTER_LEFT" spacing="15" styleClass="footer-info">
+                <Label fx:id="lblInfo" text="Total: 0 instrutor(es)" styleClass="info-label"/>
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>

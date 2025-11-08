@@ -47,13 +47,16 @@ public class AulaService {
      * @param dataHoraFim
      * @param vagasTotais 
      * @param observacoes 
+     * @param titulo
+     * @param descricao
      * @return
      * @throws BusinessException
      * @throws ConflictException 
      */
     public Aula criarAula(Long cursoId, Long instrutorId, Long localId,
                           LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim,
-                          int vagasTotais, String observacoes) {
+                          int vagasTotais, String observacoes,
+                          String titulo, String descricao) {
 
         validarDatasAula(dataHoraInicio, dataHoraFim);
         validarVagasTotais(vagasTotais);
@@ -84,6 +87,8 @@ public class AulaService {
         novaAula.setVagasDisponiveis(vagasTotais);
         novaAula.setStatus("AGENDADA");
         novaAula.setObservacoes(observacoes);
+        novaAula.setTitulo(titulo);
+        novaAula.setDescricao(descricao);
 
         Aula aulaSalva = aulaRepository.save(novaAula);
 
@@ -106,7 +111,8 @@ public class AulaService {
      */
     public Aula editarAula(Long aulaId, Long cursoId, Long instrutorId, Long localId,
                           LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim,
-                          int vagasTotais, String observacoes) {
+                          int vagasTotais, String observacoes,
+                          String titulo, String descricao) {
 
         Aula aulaExistente = aulaRepository.findById(aulaId)
                 .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
@@ -115,6 +121,10 @@ public class AulaService {
 
         validarDatasAula(dataHoraInicio, dataHoraFim);
         validarVagasTotais(vagasTotais);
+
+        if (titulo == null || titulo.trim().isEmpty()) {
+            throw new BusinessException("Título da aula é obrigatório.");
+        }
 
         Curso curso = cursoRepository.findById(cursoId)
                 .orElseThrow(() -> new BusinessException("Curso não encontrado com ID: " + cursoId));
@@ -151,6 +161,8 @@ public class AulaService {
         aulaExistente.setVagasTotais(vagasTotais);
         aulaExistente.setVagasDisponiveis(vagasTotais - inscricoesAtivas);
         aulaExistente.setObservacoes(observacoes);
+        aulaExistente.setTitulo(titulo);
+        aulaExistente.setDescricao(descricao);
 
         Aula aulaAtualizada = aulaRepository.save(aulaExistente);
 
@@ -191,6 +203,24 @@ public class AulaService {
         notificarCancelamentoAula(aulaCancelada, motivo);
 
         return aulaCancelada;
+    }
+
+    /**
+     * Remove definitivamente uma aula se ela nao estiver em andamento ou concluida.
+     */
+    public void deletarAula(Long aulaId) {
+        Aula aula = aulaRepository.findById(aulaId)
+                .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
+
+        String status = aula.getStatus() != null ? aula.getStatus().toUpperCase() : "";
+        if ("EM_ANDAMENTO".equals(status)) {
+            throw new BusinessException("Não é possível deletar uma aula que está em andamento.");
+        }
+        if ("CONCLUIDA".equals(status)) {
+            throw new BusinessException("Não é possível deletar uma aula já concluída.");
+        }
+
+        aulaRepository.delete(aula);
     }
 
     /**

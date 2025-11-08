@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.ConfiguracoesController"
+            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            style="-fx-background-color: transparent;">
+
+    <content>
+        <VBox spacing="25" styleClass="page-container">
+            
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+
+            <Label text="⚙️ Configurações do Sistema" styleClass="page-title">
+                <font><Font name="System Bold" size="26"/></font>
+            </Label>
+
+            <!-- Configurações -->
+            <VBox spacing="20" styleClass="card" VBox.vgrow="ALWAYS">
+                <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+                
+                <!-- Seção Sistema -->
+                <VBox spacing="15">
+                    <Label text="🖥️ Sistema" styleClass="section-title">
+                        <font><Font name="System Bold" size="18"/></font>
+                    </Label>
+                    <Separator/>
+                    
+                    <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="Tema do Sistema" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label text="Preto e Branco (Minimalista)" styleClass="text-muted"/>
+                        </VBox>
+                        <Label text="✅ Ativo" style="-fx-padding: 5 15; -fx-background-color: #E0E0E0; -fx-background-radius: 10;"/>
+                    </HBox>
+                    
+                </VBox>
+                
+                <Separator/>
+                
+                <!-- Seção Auditoria e Perfis -->
+                <VBox spacing="15">
+                    <Label text="🛡 Auditoria e Perfis Operacionais" styleClass="section-title">
+                        <font><Font name="System Bold" size="18"/></font>
+                    </Label>
+                    <Separator/>
+
+                    <CheckBox fx:id="auditoriaCheckBox" selected="true"
+                              text="Ativar trilha de auditoria para ações críticas"
+                              onAction="#handleAuditoriaAlterada"/>
+                    <Label fx:id="auditoriaStatusLabel" text="Auditoria habilitada"
+                           styleClass="text-muted"/>
+
+                    <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="Modo Operacional" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label text="Define as permissões visíveis nesta sessão" styleClass="text-muted"/>
+                        </VBox>
+                        <ComboBox fx:id="perfilComboBox" prefWidth="260" onAction="#handlePerfilAlterado"/>
+                    </HBox>
+
+                    <Label fx:id="perfilDescricaoLabel" wrapText="true"
+                           style="-fx-background-color: #F3F4F6; -fx-padding: 12; -fx-background-radius: 10;"/>
+                </VBox>
+                
+                <Separator/>
+                
+                <!-- Seção Banco de Dados -->
+                <VBox spacing="15">
+                    <Label text="💾 Banco de Dados" styleClass="section-title">
+                        <font><Font name="System Bold" size="18"/></font>
+                    </Label>
+                    <Separator/>
+                    
+                    <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="Tipo de Banco" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label text="H2 Database (Em Memória)" styleClass="text-muted"/>
+                        </VBox>
+                        <Label text="✅ Conectado" style="-fx-text-fill: #000000; -fx-padding: 5 15; -fx-background-color: #E0E0E0; -fx-background-radius: 10; -fx-font-weight: bold;"/>
+                    </HBox>
+                    
+                    <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="URL do Banco" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                            <Label text="jdbc:h2:mem:veridiadb" styleClass="text-muted" style="-fx-font-family: 'Courier New';"/>
+                        </VBox>
+                        <Button text="🔗 Console H2" styleClass="btn-secondary"/>
+                    </HBox>
+                </VBox>
+                
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>
