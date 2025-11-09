@@ -1,20 +1,14 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-
-import br.com.unit.gerenciamentoAulas.repositories.AlunoRepository;
-import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
-import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
-import br.com.unit.gerenciamentoAulas.repositories.InscricaoRepository;
-import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
-import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
+import br.com.unit.gerenciamentoAulas.repositories.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 @Controller
 public class Dashboard implements Initializable {

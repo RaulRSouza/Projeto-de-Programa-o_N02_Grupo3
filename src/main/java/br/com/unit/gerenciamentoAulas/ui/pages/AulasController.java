@@ -1,5 +1,5 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
-public class EditarInstrutorController {
+public class AulasController {
     
 }
