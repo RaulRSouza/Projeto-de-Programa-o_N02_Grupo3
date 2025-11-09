@@ -14,10 +14,10 @@ import org.springframework.stereotype.Controller;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.entidades.Local;
-import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
+import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -151,7 +151,7 @@ public class CriarAulaController {
                 return;
             }
 
-            vagasSpinner.increment(0); 
+            vagasSpinner.increment(0); // garante que o valor digitado seja confirmado
             Integer vagasValor = vagasSpinner.getValue();
             int vagasTotais = vagasValor != null ? vagasValor : 0;
             String observacoes = observacoesArea.getText() != null
