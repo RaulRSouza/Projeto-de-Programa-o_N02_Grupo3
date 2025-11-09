@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.CriarCursoController"
+            prefWidth="520" prefHeight="560">
+
+    <center>
+        <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Cadastrar Novo Curso" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="20"/>
+                    </font>
+                </Label>
+                <Label text="Preencha as informações abaixo para adicionar um curso ao catálogo."
+                       styleClass="text-muted"/>
+            </VBox>
+
+            <GridPane hgap="18" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER" minWidth="140"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Nome do curso*" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="nomeField" promptText="Ex.: Programação Java"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Categoria" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="categoriaField" promptText="Ex.: Tecnologia"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Carga horária (horas)*" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="cargaHorariaField" promptText="Ex.: 40"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Descrição" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextArea fx:id="descricaoArea" promptText="Conteúdo programático, objetivos, etc."
+                          prefRowCount="4"
+                          GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Status" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <CheckBox fx:id="ativoCheckBox" text="Curso ativo"
+                          GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button fx:id="cancelarButton" text="Cancelar" onAction="#cancelar"
+                        styleClass="btn-secondary"/>
+                <Button fx:id="salvarButton" text="Salvar Curso" onAction="#salvarCurso"
+                        styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

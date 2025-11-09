@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.CriarLocalController"
+            prefWidth="520" prefHeight="520">
+
+    <center>
+        <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Cadastrar Novo Local" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="20"/>
+                    </font>
+                </Label>
+                <Label text="Configure salas presenciais ou ambientes virtuais para suas aulas."
+                       styleClass="text-muted"/>
+            </VBox>
+
+            <GridPane hgap="18" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="140"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Nome do local*" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="nomeField" promptText="Ex.: Laboratório 01"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Endereço / Link*" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="enderecoField" promptText="Ex.: Rua Alfa, 123"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Capacidade*" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="capacidadeField" promptText="Ex.: 30"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Tipo" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="tipoField" promptText="Presencial, Online, Híbrido..."
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Disponibilidade" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <CheckBox fx:id="disponivelCheckBox" text="Local disponível para agendamento"
+                          GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button fx:id="cancelarButton" text="Cancelar" onAction="#cancelar"
+                        styleClass="btn-secondary"/>
+                <Button fx:id="salvarButton" text="Salvar Local" onAction="#salvarLocal"
+                        styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

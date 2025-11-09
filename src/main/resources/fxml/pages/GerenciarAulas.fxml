@@ -14,21 +14,21 @@
     </padding>
 
     <HBox alignment="CENTER_LEFT" spacing="15">
-        <Label text="📚 Gerenciamento de Aulas" styleClass="page-title">
+        <Label text="Gerenciamento de Aulas" styleClass="page-title">
             <font><Font name="System Bold" size="26"/></font>
         </Label>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnNova" text="➕ Nova Aula" onAction="#handleNova" styleClass="btn-primary btn-large"/>
+        <Button fx:id="btnNova" text="Nova Aula" onAction="#handleNova" styleClass="btn-primary btn-large"/>
     </HBox>
 
     <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
         <Label text="Filtrar:" styleClass="filter-label"/>
-        <Button text="📋 Todas" onAction="#handleTodas" styleClass="btn-filter"/>
-        <Button text="📅 Futuras" onAction="#handleFuturas" styleClass="btn-filter"/>
-        <Button text="💺 Disponíveis" onAction="#handleDisponiveis" styleClass="btn-filter"/>
-        <Button text="🚫 Canceladas" onAction="#handleCanceladas" styleClass="btn-filter"/>
+        <Button text="Todas" onAction="#handleTodas" styleClass="btn-filter"/>
+        <Button text="Futuras" onAction="#handleFuturas" styleClass="btn-filter"/>
+        <Button text="Disponíveis" onAction="#handleDisponiveis" styleClass="btn-filter"/>
+        <Button text="Canceladas" onAction="#handleCanceladas" styleClass="btn-filter"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnAtualizar" text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
+        <Button fx:id="btnAtualizar" text="Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
     </HBox>
 
     <TableView fx:id="tabelaAulas" VBox.vgrow="ALWAYS" styleClass="modern-table">
@@ -54,7 +54,7 @@
         <Label fx:id="lblAlertasVisuais" text="" visible="false" managed="false"
                style="-fx-text-fill: #92400e; -fx-background-color: #ffedd5; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-weight: bold;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="📊 Exportar CSV" onAction="#handleExportarCSV" styleClass="btn-secondary"/>
+        <Button text="Exportar CSV" onAction="#handleExportarCSV" styleClass="btn-secondary"/>
     </HBox>
 
 </VBox>

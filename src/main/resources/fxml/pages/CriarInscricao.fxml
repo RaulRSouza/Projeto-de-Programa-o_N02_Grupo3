@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.CriarInscricaoController"
+            prefWidth="520" prefHeight="420">
+
+    <center>
+        <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Nova Inscrição" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="20"/>
+                    </font>
+                </Label>
+                <Label text="Associe um aluno a uma aula disponível para confirmar a participação."
+                       styleClass="text-muted" wrapText="true"/>
+            </VBox>
+
+            <GridPane hgap="18" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="140"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Aluno*" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="alunoComboBox" promptText="Selecione o aluno"
+                          GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Aula*" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <ComboBox fx:id="aulaComboBox" promptText="Selecione a aula"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Data da inscrição*" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <DatePicker fx:id="dataInscricaoDatePicker" promptText="Selecione a data"
+                            GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button fx:id="cancelarButton" text="Cancelar" onAction="#cancelar"
+                        styleClass="btn-secondary"/>
+                <Button fx:id="salvarButton" text="Confirmar Inscrição" onAction="#salvarInscricao"
+                        styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
