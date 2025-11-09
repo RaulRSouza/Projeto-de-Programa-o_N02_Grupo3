@@ -110,9 +110,9 @@ public class GerenciarAulasController {
         });
 
         colAcoes.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEditar = new Button("✏️");
-            private final Button btnCancelar = new Button("🚫");
-            private final Button btnDeletar = new Button("🗑️");
+            private final Button btnEditar = new Button("");
+            private final Button btnCancelar = new Button("");
+            private final Button btnDeletar = new Button("");
             private final HBox hbox = new HBox(5, btnEditar, btnCancelar, btnDeletar);
 
             {
