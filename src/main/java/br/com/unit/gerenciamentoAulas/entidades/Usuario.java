@@ -107,6 +107,20 @@ public abstract class Usuario {
         return Objects.hash(id);
     }
 
+    /**
+     * Retorna o perfil do usuário baseado no tipo da classe
+     */
+    public PerfilUsuario getPerfil() {
+        if (this instanceof Administrador) {
+            return PerfilUsuario.ADMINISTRADOR;
+        } else if (this instanceof Instrutor) {
+            return PerfilUsuario.INSTRUTOR;
+        } else if (this instanceof Aluno) {
+            return PerfilUsuario.ALUNO;
+        }
+        throw new IllegalStateException("Tipo de usuário não reconhecido: " + this.getClass().getName());
+    }
+
     @Override
     public String toString() {
         return "Usuario{" +
