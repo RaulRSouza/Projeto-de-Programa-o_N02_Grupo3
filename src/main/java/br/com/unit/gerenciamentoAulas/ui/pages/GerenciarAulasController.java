@@ -22,6 +22,7 @@ import br.com.unit.gerenciamentoAulas.exceptions.AulaNotFoundException;
 import br.com.unit.gerenciamentoAulas.exceptions.BusinessException;
 import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 import javafx.application.Platform;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleStringProperty;
@@ -59,6 +60,9 @@ public class GerenciarAulasController {
 
     @Autowired
     private CsvExportService csvExportService;
+
+    @Autowired
+    private SessionManager sessionManager;
 
     @FXML private TableView<AulaRow> tabelaAulas;
     @FXML private TableColumn<AulaRow, Long> colId;
@@ -153,6 +157,10 @@ public class GerenciarAulasController {
 
     @FXML
     private void handleNova() {
+        if (!sessionManager.podeCriarAula()) {
+            sessionManager.mostrarAcessoNegado("Criar Aula");
+            return;
+        }
         abrirModal("/fxml/pages/CriarAula.fxml", "Cadastrar Aula");
     }
 
@@ -212,6 +220,15 @@ public class GerenciarAulasController {
 
     private void handleEditar(AulaRow row) {
         try {
+            Aula aula = aulaService.buscarPorId(row.getId());
+            Long instrutorId = aula.getInstrutor() != null ? aula.getInstrutor().getId() : null;
+            
+            if (!sessionManager.podeEditarAula() && 
+                !sessionManager.podeEditarAulaDoInstrutor(instrutorId)) {
+                sessionManager.mostrarAcessoNegadoAulaNaoPropria();
+                return;
+            }
+            
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/pages/EditarAula.fxml"));
             loader.setControllerFactory(SpringContext.getSpringContext()::getBean);
             Parent root = loader.load();
@@ -233,24 +250,38 @@ public class GerenciarAulasController {
     }
 
     private void handleCancelar(AulaRow row) {
-        Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacao.setTitle("Cancelar Aula");
-        confirmacao.setHeaderText("Deseja realmente cancelar esta aula?");
-        confirmacao.setContentText("Aula: " + row.getTitulo());
+        try {
+            Aula aula = aulaService.buscarPorId(row.getId());
+            Long instrutorId = aula.getInstrutor() != null ? aula.getInstrutor().getId() : null;
+            
+            if (!sessionManager.podeCancelarAula() && 
+                !sessionManager.podeEditarAulaDoInstrutor(instrutorId)) {
+                sessionManager.mostrarAcessoNegadoAulaNaoPropria();
+                return;
+            }
+            
+            Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmacao.setTitle("Cancelar Aula");
+            confirmacao.setHeaderText("Deseja realmente cancelar esta aula?");
+            confirmacao.setContentText("Aula: " + row.getTitulo());
 
-        Optional<ButtonType> resultado = confirmacao.showAndWait();
-        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
-            try {
+            Optional<ButtonType> resultado = confirmacao.showAndWait();
+            if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
                 aulaService.cancelarAula(row.getId(), "Cancelada pelo usuário");
                 mostrarSucesso("Aula cancelada", "A aula foi cancelada com sucesso");
                 carregarTodasAulas();
-            } catch (Exception e) {
-                mostrarErro("Erro ao cancelar", e.getMessage());
             }
+        } catch (Exception e) {
+            mostrarErro("Erro ao cancelar", e.getMessage());
         }
     }
 
     private void handleDeletar(AulaRow row) {
+        if (!sessionManager.podeDeletarAula()) {
+            sessionManager.mostrarAcessoNegado("Deletar Aula");
+            return;
+        }
+        
         Alert confirmacao = new Alert(Alert.AlertType.CONFIRMATION);
         confirmacao.setTitle("Deletar Aula");
         confirmacao.setHeaderText("Deseja realmente deletar esta aula?");
