@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarLinkRequest;
 import br.com.unit.gerenciamentoAulas.dtos.ReagendamentoRequest;
+import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarLinkRequest;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
@@ -35,8 +35,12 @@ import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
 import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
-import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
 import br.com.unit.gerenciamentoAulas.servicos.NotificacaoService;
+import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
+import br.com.unit.gerenciamentoAulas.servicos.AuditoriaService;
+import br.com.unit.gerenciamentoAulas.entidades.Usuario;
+import br.com.unit.gerenciamentoAulas.entidades.AcaoSistema;
+import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
 
 @RestController
 @RequestMapping("/api/aulas")
@@ -61,6 +65,12 @@ public class AulaController {
     @Autowired
     private CsvExportService csvExportService;
 
+    @Autowired
+    private AuditoriaService auditoriaService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @GetMapping
     public ResponseEntity<List<Aula>> listarTodas() {
         List<Aula> aulas = aulaRepository.findAll();
@@ -75,8 +85,15 @@ public class AulaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Aula aula) {
+    public ResponseEntity<?> criar(@RequestBody Aula aula, @RequestParam Long usuarioId) {
         try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+            
+            auditoriaService.validarCriacaoAula(usuario);
+            auditoriaService.registrarAcao(usuario, AcaoSistema.CRIAR_AULA, 
+                    "Criando nova aula");
+            
             if (aula.getCurso() == null || aula.getCurso().getId() == null) {
                 return ResponseEntity.badRequest().body("Curso eh obrigatorio");
             }
@@ -142,7 +159,15 @@ public class AulaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Aula aulaAtualizada) {
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Aula aulaAtualizada, 
+                                       @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarEdicaoAula(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_AULA, 
+                "Editando aula ID: " + id);
+        
         return aulaRepository.findById(id)
                 .map(aula -> {
                     if (aulaAtualizada.getDataHoraInicio() != null) {
@@ -166,7 +191,15 @@ public class AulaController {
 
 
     @PatchMapping("/{id}/reagendar")
-    public ResponseEntity<?> reagendar(@PathVariable Long id, @RequestBody ReagendamentoRequest request) {
+    public ResponseEntity<?> reagendar(@PathVariable Long id, @RequestBody ReagendamentoRequest request,
+                                       @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarEdicaoAula(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_AULA, 
+                "Reagendando aula ID: " + id);
+        
         if (request == null) {
             return ResponseEntity.badRequest().body("Dados de reagendamento sao obrigatorios");
         }
@@ -227,6 +260,10 @@ public class AulaController {
         }
 
         if (request.getNovasVagasTotais() != null) {
+            auditoriaService.validarGerenciamentoCapacidade(usuario);
+            auditoriaService.registrarAcao(usuario, AcaoSistema.GERENCIAR_CAPACIDADE, 
+                    "Alterando capacidade da aula ID: " + id + " para " + request.getNovasVagasTotais() + " vagas");
+            
             int novasVagas = request.getNovasVagasTotais();
             if (novasVagas <= 0) {
                 return ResponseEntity.badRequest().body("Numero de vagas deve ser maior que zero");
@@ -272,7 +309,15 @@ public class AulaController {
 
     @PatchMapping("/{id}/material/link")
     public ResponseEntity<?> definirMaterialLink(@PathVariable Long id,
-                                                 @RequestBody MaterialComplementarLinkRequest request) {
+                                                 @RequestBody MaterialComplementarLinkRequest request,
+                                                 @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarEdicaoConteudo(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_CONTEUDO_AULA, 
+                "Definindo material complementar (link) para aula ID: " + id);
+        
         if (request == null || request.getUrl() == null || request.getUrl().isBlank()) {
             return ResponseEntity.badRequest().body("URL do material eh obrigatoria");
         }
@@ -289,7 +334,15 @@ public class AulaController {
 
     @PostMapping(value = "/{id}/material/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadMaterial(@PathVariable Long id,
-                                            @RequestPart("arquivo") MultipartFile arquivo) {
+                                            @RequestPart("arquivo") MultipartFile arquivo,
+                                            @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarEdicaoConteudo(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_CONTEUDO_AULA, 
+                "Upload de material complementar para aula ID: " + id);
+        
         if (arquivo == null || arquivo.isEmpty()) {
             return ResponseEntity.badRequest().body("Arquivo do material eh obrigatorio");
         }
@@ -350,7 +403,14 @@ public class AulaController {
     }
 
     @DeleteMapping("/{id}/material")
-    public ResponseEntity<?> removerMaterial(@PathVariable Long id) {
+    public ResponseEntity<?> removerMaterial(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarEdicaoConteudo(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_CONTEUDO_AULA, 
+                "Removendo material complementar da aula ID: " + id);
+        
         return aulaRepository.findById(id)
                 .map(aula -> {
                     aula.limparMaterialComplementar();
@@ -361,7 +421,14 @@ public class AulaController {
     }
 
     @PatchMapping("/{id}/cancelar")
-    public ResponseEntity<?> cancelar(@PathVariable Long id) {
+    public ResponseEntity<?> cancelar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarCancelamentoAula(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.CANCELAR_AULA, 
+                "Cancelando aula ID: " + id);
+        
         return aulaRepository.findById(id)
                 .map(aula -> {
                     aula.setStatus("CANCELADA");
@@ -371,8 +438,27 @@ public class AulaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{id}/solicitar-cancelamento")
+    public ResponseEntity<?> solicitarCancelamento(@PathVariable Long id, 
+                                                    @RequestParam Long usuarioId,
+                                                    @RequestParam String motivo) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.registrarSolicitacaoCancelamento(usuario, id, motivo);
+        
+        return ResponseEntity.ok("Solicitacao de cancelamento registrada. Aguarde aprovacao do Administrador.");
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Long id) {
+    public ResponseEntity<?> deletar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarCancelamentoAula(usuario);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.CANCELAR_AULA, 
+                "Deletando aula ID: " + id);
+        
         if (!aulaRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
