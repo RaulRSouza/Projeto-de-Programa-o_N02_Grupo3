@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
+import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
+import br.com.unit.gerenciamentoAulas.servicos.AuditoriaService;
+import br.com.unit.gerenciamentoAulas.entidades.Usuario;
+import br.com.unit.gerenciamentoAulas.entidades.AcaoSistema;
+import br.com.unit.gerenciamentoAulas.entidades.PerfilUsuario;
 
 @RestController
 @RequestMapping("/api/cursos")
@@ -27,6 +32,12 @@ public class CursoController {
 
     @Autowired
     private CursoRepository cursoRepository;
+
+    @Autowired
+    private AuditoriaService auditoriaService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @GetMapping
     public ResponseEntity<List<Curso>> listarTodos() {
@@ -42,8 +53,15 @@ public class CursoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Curso curso) {
+    public ResponseEntity<?> criar(@RequestBody Curso curso, @RequestParam Long usuarioId) {
         try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+            
+            auditoriaService.validarPermissao(usuario, AcaoSistema.CRIAR_CURSO);
+            auditoriaService.registrarAcao(usuario, AcaoSistema.CRIAR_CURSO, 
+                    "Criando curso: " + curso.getNome());
+            
             if (curso.getNome() == null || curso.getNome().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("Nome do curso é obrigatório");
             }
@@ -60,7 +78,15 @@ public class CursoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Curso cursoAtualizado) {
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Curso cursoAtualizado,
+                                       @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarPermissao(usuario, AcaoSistema.EDITAR_CURSO);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_CURSO, 
+                "Editando curso ID: " + id);
+        
         return cursoRepository.findById(id)
                 .map(curso -> {
                     if (cursoAtualizado.getNome() != null) {
@@ -83,7 +109,15 @@ public class CursoController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestParam boolean ativo) {
+    public ResponseEntity<?> alterarStatus(@PathVariable Long id, @RequestParam boolean ativo,
+                                          @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarPermissao(usuario, AcaoSistema.EDITAR_CURSO);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EDITAR_CURSO, 
+                "Alterando status do curso ID: " + id + " para " + (ativo ? "ATIVO" : "INATIVO"));
+        
         return cursoRepository.findById(id)
                 .map(curso -> {
                     curso.setAtivo(ativo);
@@ -94,7 +128,14 @@ public class CursoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Long id) {
+    public ResponseEntity<?> deletar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        auditoriaService.validarPermissao(usuario, AcaoSistema.EXCLUIR_CURSO);
+        auditoriaService.registrarAcao(usuario, AcaoSistema.EXCLUIR_CURSO, 
+                "Deletando curso ID: " + id);
+        
         if (!cursoRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

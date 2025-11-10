@@ -13,6 +13,7 @@
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
 
+    <!-- Header -->
     <HBox alignment="CENTER_LEFT" spacing="15">
         <Label text="📚 Gerenciamento de Aulas" styleClass="page-title">
             <font><Font name="System Bold" size="26"/></font>
@@ -21,6 +22,7 @@
         <Button fx:id="btnNova" text="➕ Nova Aula" onAction="#handleNova" styleClass="btn-primary btn-large"/>
     </HBox>
 
+    <!-- Filtros -->
     <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
         <Label text="Filtrar:" styleClass="filter-label"/>
         <Button text="📋 Todas" onAction="#handleTodas" styleClass="btn-filter"/>
@@ -31,6 +33,7 @@
         <Button fx:id="btnAtualizar" text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
     </HBox>
 
+    <!-- Tabela -->
     <TableView fx:id="tabelaAulas" VBox.vgrow="ALWAYS" styleClass="modern-table">
         <columns>
             <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
@@ -47,6 +50,7 @@
         </columns>
     </TableView>
 
+    <!-- Footer -->
     <HBox alignment="CENTER_LEFT" spacing="15" styleClass="footer-info">
         <Label fx:id="lblTotal" text="Total: 0 aula(s)" styleClass="info-label">
             <font><Font name="System Bold" size="14"/></font>

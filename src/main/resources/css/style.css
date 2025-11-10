@@ -28,6 +28,7 @@
     -fx-font-size: 14px;
 }
 
+/* ========== SIDEBAR ========== */
 .sidebar {
     -fx-background-color: #F5F5F5;
     -fx-min-width: 220px;
@@ -76,6 +77,7 @@
     -fx-background-color: #E0E0E0;
 }
 
+/* ========== CONTENT AREA ========== */
 .content-area {
     -fx-background-color: #FFFFFF;
 }
@@ -100,6 +102,7 @@
     -fx-font-weight: 600;
 }
 
+/* ========== STAT CARDS ========== */
 .stat-card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 8px;
@@ -136,6 +139,7 @@
     -fx-padding: 10 0 0 0;
 }
 
+/* ========== BUTTONS ========== */
 .button {
     -fx-font-size: 14px;
     -fx-font-weight: 500;
@@ -220,6 +224,7 @@
     -fx-background-radius: 4;
 }
 
+/* ========== TABLES ========== */
 .modern-table {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 12px;
@@ -307,6 +312,7 @@
     -fx-padding: 6 10;
 }
 
+/* ========== FILTER BAR ========== */
 .filter-bar {
     -fx-background-color: white;
     -fx-padding: 15;
@@ -322,6 +328,7 @@
     -fx-font-weight: 600;
 }
 
+/* ========== FOOTER ========== */
 .footer-info {
     -fx-background-color: white;
     -fx-padding: 15;
@@ -367,10 +374,12 @@
     -fx-background-radius: 4;
 }
 
+/* ========== SEPARATOR ========== */
 .separator {
     -fx-background-color: #E0E0E0;
 }
 
+/* ========== FORM FIELDS ========== */
 .text-field, .text-area, .combo-box, .date-picker {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 6px;
@@ -392,6 +401,7 @@
     -fx-pref-height: 100px;
 }
 
+/* ========== LABELS ========== */
 .form-label {
     -fx-text-fill: #000000;
     -fx-font-size: 14px;
@@ -403,6 +413,7 @@
     -fx-text-fill: #666666;
 }
 
+/* ========== ALERTS & BADGES ========== */
 .alert-success {
     -fx-background-color: #F5F5F5;
     -fx-text-fill: #000000;
@@ -462,6 +473,7 @@
     -fx-text-fill: #000000;
 }
 
+/* ========== MODAL & DIALOG ========== */
 .dialog-pane {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 16px;
@@ -489,6 +501,7 @@
     -fx-background-color: #F8F9FA;
 }
 
+/* ========== CARDS ========== */
 .card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 12px;
@@ -512,10 +525,12 @@
     -fx-font-size: 14px;
 }
 
+/* ========== LOADING SPINNER ========== */
 .progress-indicator {
     -fx-progress-color: #1A73E8;
 }
 
+/* ========== CHECKBOX & RADIO ========== */
 .check-box, .radio-button {
     -fx-text-fill: #202124;
     -fx-font-size: 14px;
@@ -537,6 +552,7 @@
     -fx-border-color: #1A73E8;
 }
 
+/* ========== TOOLTIP ========== */
 .tooltip {
     -fx-background-color: #202124;
     -fx-text-fill: white;
@@ -546,6 +562,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0, 0, 2);
 }
 
+/* ========== ANIMATIONS ========== */
 .fade-in {
     -fx-opacity: 0;
     -fx-transition: opacity 0.3s ease-in;
@@ -556,6 +573,7 @@
     -fx-transition: translate-x 0.3s ease-out;
 }
 
+/* ========== UTILITIES ========== */
 .text-center {
     -fx-alignment: CENTER;
 }

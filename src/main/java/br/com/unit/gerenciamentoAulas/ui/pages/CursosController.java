@@ -14,6 +14,7 @@ import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
 import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.servicos.AulaService;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,6 +47,9 @@ public class CursosController {
     private AulaService aulaService;
     @Autowired
     private AulaRepository aulaRepository;
+
+    @Autowired
+    private SessionManager sessionManager;
 
     @FXML private TextField txtBusca;
     @FXML private Label lblTotalCursos;
@@ -107,7 +111,7 @@ public class CursosController {
 
         colAcoes.setCellFactory(column -> new TableCell<>() {
             private final Button btnToggle = new Button();
-            private final Button btnRemover = new Button("Remover");
+            private final Button btnRemover = new Button("🗑️ Remover");
             private final HBox container = new HBox(8, btnToggle, btnRemover);
 
             {
@@ -133,7 +137,7 @@ public class CursosController {
                     setGraphic(null);
                 } else {
                     CursoRow row = getTableView().getItems().get(getIndex());
-                    btnToggle.setText(row.isAtivo() ? "Desativar" : "Ativar");
+                    btnToggle.setText(row.isAtivo() ? "⛔ Desativar" : "✅ Ativar");
                     setGraphic(container);
                 }
             }
@@ -175,6 +179,10 @@ public class CursosController {
 
     @FXML
     private void handleNovo() {
+        if (!sessionManager.podeCriarCurso()) {
+            sessionManager.mostrarAcessoNegado("Criar Curso");
+            return;
+        }
         abrirModal("/fxml/pages/CriarCurso.fxml", "Cadastrar Curso");
     }
 
@@ -214,6 +222,11 @@ public class CursosController {
     }
 
     private void alternarStatus(CursoRow row) {
+        if (!sessionManager.podeEditarCurso()) {
+            sessionManager.mostrarAcessoNegado("Editar Curso");
+            return;
+        }
+        
         Curso curso = row.getCurso();
         curso.setAtivo(!curso.isAtivo());
         cursoRepository.save(curso);
@@ -226,6 +239,11 @@ public class CursosController {
     }
 
     private void removerCurso(CursoRow row) {
+        if (!sessionManager.podeDeletarCurso()) {
+            sessionManager.mostrarAcessoNegado("Deletar Curso");
+            return;
+        }
+        
         Curso curso = row.getCurso();
         long aulasAssociadas = aulaRepository.countByCursoId(curso.getId());
 

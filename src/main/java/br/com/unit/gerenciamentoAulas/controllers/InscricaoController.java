@@ -22,6 +22,12 @@ import br.com.unit.gerenciamentoAulas.entidades.Inscricao;
 import br.com.unit.gerenciamentoAulas.repositories.AlunoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InscricaoRepository;
+import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
+import br.com.unit.gerenciamentoAulas.servicos.AuditoriaService;
+import br.com.unit.gerenciamentoAulas.entidades.Usuario;
+import br.com.unit.gerenciamentoAulas.entidades.AcaoSistema;
+import br.com.unit.gerenciamentoAulas.entidades.PerfilUsuario;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/inscricoes")
@@ -37,6 +43,12 @@ public class InscricaoController {
     @Autowired
     private AulaRepository aulaRepository;
 
+    @Autowired
+    private AuditoriaService auditoriaService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @GetMapping
     public ResponseEntity<List<Inscricao>> listarTodas() {
         List<Inscricao> inscricoes = inscricaoRepository.findAll();
@@ -51,8 +63,13 @@ public class InscricaoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Inscricao inscricao) {
+    public ResponseEntity<?> criar(@RequestBody Inscricao inscricao, @RequestParam Long usuarioId) {
         try {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+            
+            auditoriaService.validarInscricao(usuario);
+            
             if (inscricao.getAluno() == null || inscricao.getAluno().getId() == null) {
                 return ResponseEntity.badRequest().body("Aluno é obrigatório");
             }
@@ -62,6 +79,14 @@ public class InscricaoController {
 
             Aluno aluno = alunoRepository.findById(inscricao.getAluno().getId())
                     .orElseThrow(() -> new RuntimeException("Aluno não encontrado"));
+            
+            if (!usuario.getId().equals(aluno.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Aluno so pode se inscrever em aulas para si mesmo");
+            }
+            
+            auditoriaService.registrarAcao(usuario, AcaoSistema.INSCREVER_SE, 
+                    "Inscrevendo-se na aula ID: " + inscricao.getAula().getId());
             Aula aula = aulaRepository.findById(inscricao.getAula().getId())
                     .orElseThrow(() -> new RuntimeException("Aula não encontrada"));
 
@@ -101,9 +126,29 @@ public class InscricaoController {
     }
 
     @PatchMapping("/{id}/cancelar")
-    public ResponseEntity<?> cancelar(@PathVariable Long id) {
+    public ResponseEntity<?> cancelar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
+        if (usuario.getPerfil() != PerfilUsuario.ALUNO) {
+            auditoriaService.registrarAcessoNegado(usuario, AcaoSistema.CANCELAR_INSCRICAO,
+                    "Apenas Alunos podem cancelar inscricoes");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Apenas Alunos podem cancelar inscricoes");
+        }
+        
         return inscricaoRepository.findById(id)
                 .map(inscricao -> {
+                    if (!inscricao.getAluno().getId().equals(usuario.getId())) {
+                        auditoriaService.registrarAcessoNegado(usuario, AcaoSistema.CANCELAR_INSCRICAO,
+                                "Aluno tentou cancelar inscricao de outro aluno");
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("Voce so pode cancelar suas proprias inscricoes");
+                    }
+                    
+                    auditoriaService.registrarAcao(usuario, AcaoSistema.CANCELAR_INSCRICAO, 
+                            "Cancelando inscricao ID: " + id + " da aula ID: " + inscricao.getAula().getId());
+                    
                     inscricao.setStatus("CANCELADA");
                     inscricaoRepository.save(inscricao);
 
@@ -117,9 +162,24 @@ public class InscricaoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(@PathVariable Long id) {
+    public ResponseEntity<?> deletar(@PathVariable Long id, @RequestParam Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado"));
+        
         return inscricaoRepository.findById(id)
                 .map(inscricao -> {
+                    if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR &&
+                        (usuario.getPerfil() != PerfilUsuario.ALUNO || 
+                         !inscricao.getAluno().getId().equals(usuario.getId()))) {
+                        auditoriaService.registrarAcessoNegado(usuario, AcaoSistema.CANCELAR_INSCRICAO,
+                                "Usuario tentou deletar inscricao sem permissao");
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("Voce nao tem permissao para deletar esta inscricao");
+                    }
+                    
+                    auditoriaService.registrarAcao(usuario, AcaoSistema.CANCELAR_INSCRICAO, 
+                            "Deletando inscricao ID: " + id);
+                    
                     if ("CONFIRMADA".equalsIgnoreCase(inscricao.getStatus())) {
                         Aula aula = inscricao.getAula();
                         aula.setVagasDisponiveis(aula.getVagasDisponiveis() + 1);

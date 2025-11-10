@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -42,6 +43,8 @@ public class InstrutoresController {
     private InstrutorRepository instrutorRepository;
     @Autowired
     private AulaRepository aulaRepository;
+    @Autowired
+    private SessionManager sessionManager;
 
     @FXML private TextField txtBusca;
     @FXML private Label lblTotalInstrutores;
@@ -80,7 +83,7 @@ public class InstrutoresController {
         colTelefone.setCellValueFactory(new PropertyValueFactory<>("telefone"));
 
         colAcoes.setCellFactory(column -> new TableCell<>() {
-            private final Button btnRemover = new Button("Remover");
+            private final Button btnRemover = new Button("🗑️ Remover");
             private final HBox container = new HBox(btnRemover);
 
             {
@@ -140,6 +143,10 @@ public class InstrutoresController {
 
     @FXML
     private void handleNovo() {
+        if (!sessionManager.podeCriarInstrutor()) {
+            sessionManager.mostrarAcessoNegado("Criar Instrutor");
+            return;
+        }
         abrirModal("/fxml/pages/CriarInstrutor.fxml", "Cadastrar Instrutor");
     }
 
@@ -173,6 +180,11 @@ public class InstrutoresController {
     }
 
     private void removerInstrutor(InstrutorRow row) {
+        if (!sessionManager.podeDeletarInstrutor()) {
+            sessionManager.mostrarAcessoNegado("Deletar Instrutor");
+            return;
+        }
+        
         Instrutor instrutor = row.getInstrutor();
         long aulasAssociadas = aulaRepository.countByInstrutorId(instrutor.getId());
 

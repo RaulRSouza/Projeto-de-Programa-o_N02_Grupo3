@@ -3,6 +3,9 @@ package br.com.unit.gerenciamentoAulas.ui.pages;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * Helper class to access Spring ApplicationContext from non-Spring managed classes
+ */
 @Component
 public class SpringContext {
     

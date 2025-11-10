@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 
 import br.com.unit.gerenciamentoAulas.entidades.Local;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,6 +38,9 @@ public class LocaisController {
 
     @Autowired
     private LocalRepository localRepository;
+
+    @Autowired
+    private SessionManager sessionManager;
 
     @FXML private TextField txtBusca;
     @FXML private Label lblTotalLocais;
@@ -96,7 +100,7 @@ public class LocaisController {
                     setGraphic(null);
                 } else {
                     LocalRow row = getTableView().getItems().get(getIndex());
-                    btnToggle.setText(row.isDisponivel() ? "Indisponibilizar" : "Disponibilizar");
+                    btnToggle.setText(row.isDisponivel() ? "⛔ Indisponibilizar" : "✅ Disponibilizar");
                     setGraphic(container);
                 }
             }
@@ -135,6 +139,10 @@ public class LocaisController {
 
     @FXML
     private void handleNovo() {
+        if (!sessionManager.podeCriarLocal()) {
+            sessionManager.mostrarAcessoNegado("Criar Local");
+            return;
+        }
         abrirModal("/fxml/pages/CriarLocal.fxml", "Cadastrar Local");
     }
 
@@ -167,6 +175,11 @@ public class LocaisController {
     }
 
     private void alternarDisponibilidade(LocalRow row) {
+        if (!sessionManager.podeEditarLocal()) {
+            sessionManager.mostrarAcessoNegado("Editar Local");
+            return;
+        }
+        
         Local local = row.getLocal();
         local.setDisponivel(!local.isDisponivel());
         localRepository.save(local);
