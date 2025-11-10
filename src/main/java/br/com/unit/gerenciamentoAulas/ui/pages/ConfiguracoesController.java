@@ -13,9 +13,20 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import br.com.unit.gerenciamentoAulas.entidades.PerfilUsuario;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 
 @Component
 public class ConfiguracoesController implements Initializable {
+
+    @Autowired
+    private SessionManager sessionManager;
 
     private static final Map<String, String> DESCRICOES_PERFIL = new LinkedHashMap<>();
 
@@ -46,10 +57,13 @@ public class ConfiguracoesController implements Initializable {
     @FXML
     private Label perfilDescricaoLabel;
 
+    private String perfilAnterior = "Administrador";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         perfilComboBox.setItems(FXCollections.observableArrayList(DESCRICOES_PERFIL.keySet()));
         perfilComboBox.getSelectionModel().selectFirst();
+        perfilAnterior = perfilComboBox.getSelectionModel().getSelectedItem();
         atualizarDescricaoPerfil();
         atualizarStatusAuditoria();
     }
@@ -61,7 +75,51 @@ public class ConfiguracoesController implements Initializable {
 
     @FXML
     private void handlePerfilAlterado() {
-        atualizarDescricaoPerfil();
+        String perfilSelecionado = perfilComboBox.getSelectionModel().getSelectedItem();
+        
+        // Se o perfil mudou, mostra alerta de confirmação
+        if (!perfilSelecionado.equals(perfilAnterior)) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Mudança de Perfil");
+            alert.setHeaderText("Você está mudando de perfil!");
+            alert.setContentText(String.format(
+                "Perfil Atual: %s\n" +
+                "Novo Perfil: %s\n\n" +
+                "Ao mudar de perfil, suas permissões serão alteradas.\n" +
+                "Deseja continuar?",
+                perfilAnterior, perfilSelecionado
+            ));
+            
+            // Customiza os botões
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+            
+            Optional<ButtonType> resultado = alert.showAndWait();
+            
+            if (resultado.isPresent() && resultado.get() == ButtonType.YES) {
+                perfilAnterior = perfilSelecionado;
+                atualizarDescricaoPerfil();
+                
+                PerfilUsuario novoPerfil = converterParaEnum(perfilSelecionado);
+                if (sessionManager != null) {
+                    sessionManager.setPerfilAtual(novoPerfil);
+                }
+                
+                // Mostra notificação de sucesso
+                Alert info = new Alert(Alert.AlertType.INFORMATION);
+                info.setTitle("Perfil Alterado");
+                info.setHeaderText("✅ Perfil alterado com sucesso!");
+                info.setContentText(String.format(
+                    "Agora você está operando como: %s\n\n%s",
+                    perfilSelecionado,
+                    DESCRICOES_PERFIL.get(perfilSelecionado)
+                ));
+                info.showAndWait();
+            } else {
+                perfilComboBox.getSelectionModel().select(perfilAnterior);
+            }
+        } else {
+            atualizarDescricaoPerfil();
+        }
     }
 
     private void atualizarStatusAuditoria() {
@@ -79,5 +137,18 @@ public class ConfiguracoesController implements Initializable {
         perfilDescricaoLabel.setText(perfil != null
                 ? perfil + "\n" + descricao
                 : "Selecione um modo operacional para visualizar suas permissões.");
+    }
+    
+    private PerfilUsuario converterParaEnum(String perfil) {
+        switch (perfil) {
+            case "Administrador":
+                return PerfilUsuario.ADMINISTRADOR;
+            case "Instrutor":
+                return PerfilUsuario.INSTRUTOR;
+            case "Aluno":
+                return PerfilUsuario.ALUNO;
+            default:
+                return PerfilUsuario.ADMINISTRADOR;
+        }
     }
 }
