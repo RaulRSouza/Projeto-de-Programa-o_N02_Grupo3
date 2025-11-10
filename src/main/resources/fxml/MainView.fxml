@@ -74,6 +74,7 @@
                     <font><Font name="System Bold" size="26"/></font>
                 </Label>
 
+                <!-- Cards de Estatísticas -->
                 <GridPane hgap="20" vgap="20">
                     <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
                         <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
@@ -106,6 +107,7 @@
                     </VBox>
                 </GridPane>
 
+                <!-- Aulas Recentes -->
                 <VBox spacing="15" VBox.vgrow="ALWAYS">
                     <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="📋 Aulas Recentes" styleClass="section-title">
