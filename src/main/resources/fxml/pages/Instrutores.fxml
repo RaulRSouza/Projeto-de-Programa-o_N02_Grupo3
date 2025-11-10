@@ -17,21 +17,21 @@
             </padding>
 
             <HBox alignment="CENTER_LEFT" spacing="15">
-                <Label text="👨‍🏫 Cadastro de Instrutores" styleClass="page-title">
+                <Label text="Cadastro de Instrutores" styleClass="page-title">
                     <font>
                         <Font name="System Bold" size="26"/>
                     </font>
                 </Label>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🔄 Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
-                <Button text="➕ Novo Instrutor" onAction="#handleNovo" styleClass="btn-primary btn-large"/>
+                <Button text="Atualizar" onAction="#handleAtualizar" styleClass="btn-secondary"/>
+                <Button text="Novo Instrutor" onAction="#handleNovo" styleClass="btn-primary btn-large"/>
             </HBox>
 
             <Label fx:id="lblFlash" text="" visible="false" managed="false"
                    style="-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-padding: 8 16; -fx-background-radius: 8; -fx-font-weight: bold;"/>
 
             <HBox spacing="10" styleClass="filter-bar" alignment="CENTER_LEFT">
-                <Label text="🔍 Buscar:" styleClass="filter-label"/>
+                <Label text="Buscar:" styleClass="filter-label"/>
                 <TextField fx:id="txtBusca" promptText="Nome, especialidade ou registro..."
                            HBox.hgrow="ALWAYS"/>
                 <Button text="Filtrar" onAction="#handleBuscar" styleClass="btn-primary"/>
@@ -43,7 +43,7 @@
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
-                    <Label text="👨‍🏫 Instrutores" styleClass="stat-title"/>
+                    <Label text="Instrutores" styleClass="stat-title"/>
                     <Label fx:id="lblTotalInstrutores" text="0" styleClass="stat-value"/>
                 </VBox>
 
@@ -51,7 +51,7 @@
                     <padding>
                         <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
-                    <Label text="📚 Especialidades" styleClass="stat-title"/>
+                    <Label text="Especialidades" styleClass="stat-title"/>
                     <Label fx:id="lblEspecialidades" text="0" styleClass="stat-value"/>
                 </VBox>
             </GridPane>

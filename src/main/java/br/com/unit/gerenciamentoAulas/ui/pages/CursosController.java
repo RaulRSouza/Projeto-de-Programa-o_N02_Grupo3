@@ -107,7 +107,7 @@ public class CursosController {
 
         colAcoes.setCellFactory(column -> new TableCell<>() {
             private final Button btnToggle = new Button();
-            private final Button btnRemover = new Button("🗑️ Remover");
+            private final Button btnRemover = new Button("Remover");
             private final HBox container = new HBox(8, btnToggle, btnRemover);
 
             {
@@ -133,7 +133,7 @@ public class CursosController {
                     setGraphic(null);
                 } else {
                     CursoRow row = getTableView().getItems().get(getIndex());
-                    btnToggle.setText(row.isAtivo() ? "⛔ Desativar" : "✅ Ativar");
+                    btnToggle.setText(row.isAtivo() ? "Desativar" : "Ativar");
                     setGraphic(container);
                 }
             }

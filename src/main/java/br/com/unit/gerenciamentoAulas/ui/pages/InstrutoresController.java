@@ -80,7 +80,7 @@ public class InstrutoresController {
         colTelefone.setCellValueFactory(new PropertyValueFactory<>("telefone"));
 
         colAcoes.setCellFactory(column -> new TableCell<>() {
-            private final Button btnRemover = new Button("🗑️ Remover");
+            private final Button btnRemover = new Button("Remover");
             private final HBox container = new HBox(btnRemover);
 
             {

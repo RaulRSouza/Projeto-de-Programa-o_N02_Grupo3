@@ -11,16 +11,6 @@ import br.com.unit.gerenciamentoAulas.entidades.PerfilUsuario;
 import br.com.unit.gerenciamentoAulas.entidades.Usuario;
 import br.com.unit.gerenciamentoAulas.exceptions.PermissaoNegadaException;
 
-/**
- * Service responsável por auditar ações dos usuários no sistema
- * 
- * Registra:
- * - Quem executou a ação (usuário e perfil)
- * - Qual ação foi executada
- * - Quando foi executada
- * - Se foi permitida ou negada
- * - Detalhes adicionais
- */
 @Service
 public class AuditoriaService {
     
@@ -30,21 +20,18 @@ public class AuditoriaService {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     
     /**
-     * Registra e valida uma ação executada por um usuário
      * 
-     * @param usuario Usuário que está executando a ação
-     * @param acao Ação sendo executada
-     * @param detalhes Detalhes adicionais sobre a ação
-     * @throws PermissaoNegadaException se o usuário não tem permissão
+     * @param usuario 
+     * @param acao 
+     * @param detalhes
+     * @throws PermissaoNegadaException 
      */
     public void registrarAcao(Usuario usuario, AcaoSistema acao, String detalhes) {
         PerfilUsuario perfil = usuario.getPerfil();
         LocalDateTime dataHora = LocalDateTime.now();
-        
-        // Valida se o usuário tem permissão
+
         boolean temPermissao = permissaoService.temPermissao(perfil, acao);
-        
-        // Registra no log
+
         String log = String.format(
             "[AUDITORIA] %s | Usuário: %s (ID: %d) | Perfil: %s | Ação: %s | Status: %s | Detalhes: %s",
             dataHora.format(FORMATTER),
@@ -57,8 +44,7 @@ public class AuditoriaService {
         );
         
         System.out.println(log);
-        
-        // Se não tem permissão, lança exceção
+
         if (!temPermissao) {
             throw new PermissaoNegadaException(
                 String.format("Usuário '%s' (%s) não tem permissão para '%s'",
@@ -68,26 +54,17 @@ public class AuditoriaService {
             );
         }
     }
-    
-    /**
-     * Valida permissão sem registrar em log (para validações rápidas)
-     */
+
     public void validarPermissao(Usuario usuario, AcaoSistema acao) {
         PerfilUsuario perfil = usuario.getPerfil();
         permissaoService.validarPermissao(perfil, acao);
     }
-    
-    /**
-     * Verifica se usuário tem permissão sem lançar exceção
-     */
+
     public boolean temPermissao(Usuario usuario, AcaoSistema acao) {
         PerfilUsuario perfil = usuario.getPerfil();
         return permissaoService.temPermissao(perfil, acao);
     }
-    
-    /**
-     * Registra tentativa de acesso negado
-     */
+
     public void registrarAcessoNegado(Usuario usuario, AcaoSistema acao, String motivo) {
         PerfilUsuario perfil = usuario.getPerfil();
         LocalDateTime dataHora = LocalDateTime.now();
@@ -105,13 +82,7 @@ public class AuditoriaService {
         System.err.println(log);
     }
     
-    /**
-     * VALIDAÇÕES ESPECÍFICAS POR PERFIL
-     */
-    
-    /**
-     * Valida se o usuário pode criar aulas (apenas Administrador)
-     */
+
     public void validarCriacaoAula(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR) {
             registrarAcessoNegado(usuario, AcaoSistema.CRIAR_AULA, 
@@ -123,9 +94,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode editar aulas (apenas Administrador)
-     */
+
     public void validarEdicaoAula(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR) {
             registrarAcessoNegado(usuario, AcaoSistema.EDITAR_AULA,
@@ -138,9 +107,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode cancelar aulas (apenas Administrador)
-     */
+
     public void validarCancelamentoAula(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR) {
             registrarAcessoNegado(usuario, AcaoSistema.CANCELAR_AULA,
@@ -153,9 +120,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode editar conteúdo de aula (Administrador ou Instrutor)
-     */
+
     public void validarEdicaoConteudo(Usuario usuario) {
         PerfilUsuario perfil = usuario.getPerfil();
         if (perfil != PerfilUsuario.ADMINISTRADOR && perfil != PerfilUsuario.INSTRUTOR) {
@@ -168,9 +133,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode se inscrever em aulas (apenas Aluno)
-     */
+
     public void validarInscricao(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ALUNO) {
             registrarAcessoNegado(usuario, AcaoSistema.INSCREVER_SE,
@@ -182,9 +145,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode gerenciar capacidade (apenas Administrador)
-     */
+
     public void validarGerenciamentoCapacidade(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR) {
             registrarAcessoNegado(usuario, AcaoSistema.GERENCIAR_CAPACIDADE,
@@ -196,9 +157,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Valida se o usuário pode associar instrutores (apenas Administrador)
-     */
+
     public void validarAssociacaoInstrutor(Usuario usuario) {
         if (usuario.getPerfil() != PerfilUsuario.ADMINISTRADOR) {
             registrarAcessoNegado(usuario, AcaoSistema.ASSOCIAR_INSTRUTOR,
@@ -210,9 +169,7 @@ public class AuditoriaService {
         }
     }
     
-    /**
-     * Registra solicitação de cancelamento de instrutor
-     */
+
     public void registrarSolicitacaoCancelamento(Usuario instrutor, Long aulaId, String motivo) {
         if (instrutor.getPerfil() != PerfilUsuario.INSTRUTOR) {
             throw new PermissaoNegadaException("Apenas instrutores podem solicitar cancelamentos");

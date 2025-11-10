@@ -96,7 +96,7 @@ public class LocaisController {
                     setGraphic(null);
                 } else {
                     LocalRow row = getTableView().getItems().get(getIndex());
-                    btnToggle.setText(row.isDisponivel() ? "⛔ Indisponibilizar" : "✅ Disponibilizar");
+                    btnToggle.setText(row.isDisponivel() ? "Indisponibilizar" : "Disponibilizar");
                     setGraphic(container);
                 }
             }
