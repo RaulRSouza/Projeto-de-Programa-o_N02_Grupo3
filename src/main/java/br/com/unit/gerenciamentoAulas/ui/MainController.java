@@ -63,16 +63,16 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        System.out.println("====================================");
-        System.out.println("Inicializando MainController...");
-        System.out.println("====================================");
+        System.out.println("🔧 ====================================");
+        System.out.println("🔧 Inicializando MainController...");
+        System.out.println("🔧 ====================================");
         
-        System.out.println("Verificando componentes:");
-        System.out.println("   - tabelaAulas: " + (tabelaAulas != null ? "[OK]" : "[FALHA]"));
-        System.out.println("   - lblTotalAulas: " + (lblTotalAulas != null ? "[OK]" : "[FALHA]"));
-        System.out.println("   - lblProximasAulas: " + (lblProximasAulas != null ? "[OK]" : "[FALHA]"));
-        System.out.println("   - lblVagasDisponiveis: " + (lblVagasDisponiveis != null ? "[OK]" : "[FALHA]"));
-        System.out.println("   - aulaService: " + (aulaService != null ? "[OK]" : "[FALHA]"));
+        System.out.println("📋 Verificando componentes:");
+        System.out.println("   - tabelaAulas: " + (tabelaAulas != null ? "✅" : "❌"));
+        System.out.println("   - lblTotalAulas: " + (lblTotalAulas != null ? "✅" : "❌"));
+        System.out.println("   - lblProximasAulas: " + (lblProximasAulas != null ? "✅" : "❌"));
+        System.out.println("   - lblVagasDisponiveis: " + (lblVagasDisponiveis != null ? "✅" : "❌"));
+        System.out.println("   - aulaService: " + (aulaService != null ? "✅" : "❌"));
         
         if (tabelaAulas != null) {
             System.out.println("⚙️ Configurando colunas da tabela...");
@@ -89,21 +89,22 @@ public class MainController {
             colStatus.setStyle("-fx-alignment: CENTER;");
             tabelaAulas.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             tabelaAulas.setItems(aulasData);
-            System.out.println("Colunas configuradas!");
+            System.out.println("✅ Colunas configuradas!");
         }
 
         if (contentArea != null && !contentArea.getChildren().isEmpty()) {
             dashboardRoot = contentArea.getChildren().get(0);
         }
         
-        System.out.println("Aguardando Spring carregar dados...");
+        // Aguardar um pouco para Spring carregar dados
+        System.out.println("⏳ Aguardando Spring carregar dados...");
         Platform.runLater(() -> {
             try {
-                Thread.sleep(1000);
-                System.out.println("Carregando dados do banco...");
+                Thread.sleep(1000); // Aumentei para 1 segundo
+                System.out.println("🔄 Carregando dados do banco...");
                 carregarDashboard();
             } catch (Exception e) {
-                System.err.println("Erro ao carregar dashboard: " + e.getMessage());
+                System.err.println("❌ Erro ao carregar dashboard: " + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -111,11 +112,12 @@ public class MainController {
 
     @FXML
     private void handleDashboard() {
-        System.out.println("Botão Dashboard clicado - recarregando dados...");
+        System.out.println("📊 Botão Dashboard clicado - recarregando dados...");
         if (dashboardRoot != null) {
             contentArea.getChildren().setAll(dashboardRoot);
         }
         
+        // Recarrega os dados do dashboard
         carregarDashboard();
     }
 
@@ -168,32 +170,32 @@ public class MainController {
     private void carregarDashboard() {
         try {
             System.out.println("========================================");
-            System.out.println("Carregando dashboard...");
+            System.out.println("📊 Carregando dashboard...");
             System.out.println("========================================");
             
             if (aulaService == null) {
-                System.err.println("AulaService está NULL!");
+                System.err.println("❌❌❌ AulaService está NULL! ❌❌❌");
                 System.err.println("   Spring não injetou o serviço!");
                 return;
             }
             
-            System.out.println("AulaService está disponível!");
-            System.out.println("Buscando aulas do banco...");
+            System.out.println("✅ AulaService está disponível!");
+            System.out.println("⏳ Buscando aulas do banco...");
             
             List<Aula> todasAulas = aulaService.listarTodas();
-            System.out.println("Total de aulas encontradas: " + todasAulas.size());
+            System.out.println("📚 Total de aulas encontradas: " + todasAulas.size());
             
             if (todasAulas.isEmpty()) {
-                System.err.println("BANCO ESTÁ VAZIO!");
+                System.err.println("⚠️⚠️⚠️ BANCO ESTÁ VAZIO! ⚠️⚠️⚠️");
                 System.err.println("   data.sql NÃO foi executado!");
                 System.err.println("   Ou o banco foi recriado sem dados!");
             }
             
             List<Aula> proximasAulas = aulaService.listarAulasFuturas();
-            System.out.println("Aulas futuras: " + proximasAulas.size());
+            System.out.println("📅 Aulas futuras: " + proximasAulas.size());
             
             List<Aula> aulasDisponiveis = aulaService.listarAulasDisponiveis();
-            System.out.println("Aulas disponíveis: " + aulasDisponiveis.size());
+            System.out.println("✅ Aulas disponíveis: " + aulasDisponiveis.size());
 
             if (lblTotalAulas != null) {
                 lblTotalAulas.setText(String.valueOf(todasAulas.size()));
@@ -215,12 +217,12 @@ public class MainController {
                 proximasAulas.subList(0, Math.min(10, proximasAulas.size())) : 
                 todasAulas.subList(0, Math.min(10, todasAulas.size()));
                 
-            System.out.println("Atualizando tabela com " + aulasParaExibir.size() + " aulas");
+            System.out.println("🔄 Atualizando tabela com " + aulasParaExibir.size() + " aulas");
             atualizarTabela(aulasParaExibir);
             
-            System.out.println("Dashboard carregado com sucesso!");
+            System.out.println("✅ Dashboard carregado com sucesso!");
         } catch (Exception e) {
-            System.err.println("Erro ao carregar dashboard: " + e.getMessage());
+            System.err.println("❌ Erro ao carregar dashboard: " + e.getMessage());
             e.printStackTrace();
             mostrarErro("Erro ao carregar dashboard", e.getMessage());
         }
