@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import br.com.unit.gerenciamentoAulas.entidades.Inscricao;
 import br.com.unit.gerenciamentoAulas.repositories.InscricaoRepository;
+import br.com.unit.gerenciamentoAulas.ui.SessionManager;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -66,6 +67,9 @@ public class InscricoesController {
 
     @Autowired
     private InscricaoRepository inscricaoRepository;
+
+    @Autowired
+    private SessionManager sessionManager;
     
     private ObservableList<Inscricao> inscricoesList;
     private PauseTransition flashTimer;
@@ -123,6 +127,11 @@ public class InscricoesController {
     
     @FXML
     private void handleNovaInscricao() {
+        if (!sessionManager.podeCriarInscricao()) {
+            sessionManager.mostrarAcessoNegado("Criar Inscrição");
+            return;
+        }
+        
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/pages/CriarInscricao.fxml"));
             loader.setControllerFactory(SpringContext.getSpringContext()::getBean);
@@ -145,6 +154,11 @@ public class InscricoesController {
     
     @FXML
     private void handleEditar() {
+        if (!sessionManager.podeCancelarInscricao()) {
+            sessionManager.mostrarAcessoNegado("Editar Inscrição");
+            return;
+        }
+        
         Inscricao selecionada = inscricoesTable.getSelectionModel().getSelectedItem();
         if (selecionada == null) {
             mostrarAlerta("Nenhuma inscrição selecionada!");
