@@ -59,4 +59,6 @@ public interface InscricaoRepository extends JpaRepository<Inscricao, Long> {
         @Param("alunoId") Long alunoId,
         @Param("agora") LocalDateTime agora
     );
+    
+    long countByAlunoId(Long alunoId);
 }

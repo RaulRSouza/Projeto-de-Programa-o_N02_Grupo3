@@ -2,8 +2,12 @@ package br.com.unit.gerenciamentoAulas.ui.pages;
 
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
+import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +27,9 @@ public class CriarInstrutorController {
 
     @Autowired
     private InstrutorRepository instrutorRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @FXML
     private void salvarInstrutor() {
@@ -39,8 +46,19 @@ public class CriarInstrutorController {
             instrutor.setEspecialidade(especialidadeField.getText().trim());
             instrutor.setRegistro(registroField.getText().trim());
             
-            if (senhaField != null && !senhaField.getText().isEmpty()) {
-                instrutor.setSenha(senhaField.getText());
+            instrutor.setSenha(senhaField.getText().trim());
+
+            if (usuarioRepository.existsByEmail(instrutor.getEmail())) {
+                mostrarAlerta("Validação", "Já existe usuário com este e-mail.", Alert.AlertType.WARNING);
+                return;
+            }
+            if (!instrutor.getCpf().isBlank() && usuarioRepository.existsByCpf(instrutor.getCpf())) {
+                mostrarAlerta("Validação", "Já existe usuário com este CPF.", Alert.AlertType.WARNING);
+                return;
+            }
+            if (instrutorRepository.existsByRegistro(instrutor.getRegistro())) {
+                mostrarAlerta("Validação", "Registro profissional já utilizado.", Alert.AlertType.WARNING);
+                return;
             }
 
             instrutorRepository.save(instrutor);
@@ -74,6 +92,10 @@ public class CriarInstrutorController {
         }
         if (registroField.getText() == null || registroField.getText().trim().isEmpty()) {
             mostrarAlerta("Validação", "Registro é obrigatório!", Alert.AlertType.WARNING);
+            return false;
+        }
+        if (senhaField.getText() == null || senhaField.getText().trim().isEmpty()) {
+            mostrarAlerta("Validação", "Defina uma senha inicial para o instrutor.", Alert.AlertType.WARNING);
             return false;
         }
         return true;

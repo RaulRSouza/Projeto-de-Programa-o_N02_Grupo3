@@ -77,6 +77,9 @@ public class Aula {
     @Column(name = "material_tipo", length = 100)
     private String materialComplementarTipo;
 
+    @Column(name = "material_titulo", length = 255)
+    private String materialComplementarTitulo;
+
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -222,6 +225,14 @@ public class Aula {
         this.materialComplementarTipo = materialComplementarTipo;
     }
 
+    public String getMaterialComplementarTitulo() {
+        return materialComplementarTitulo;
+    }
+
+    public void setMaterialComplementarTitulo(String materialComplementarTitulo) {
+        this.materialComplementarTitulo = materialComplementarTitulo;
+    }
+
     public byte[] getMaterialComplementarArquivo() {
         return materialComplementarArquivo;
     }
@@ -235,6 +246,12 @@ public class Aula {
         this.materialComplementarNomeArquivo = null;
         this.materialComplementarTipo = null;
         this.materialComplementarUrl = null;
+        this.materialComplementarTitulo = null;
+    }
+
+    public boolean possuiMaterialComplementar() {
+        return (materialComplementarUrl != null && !materialComplementarUrl.isBlank()) ||
+               (materialComplementarArquivo != null && materialComplementarArquivo.length > 0);
     }
 
     public void adicionarInscricao(Inscricao inscricao) {

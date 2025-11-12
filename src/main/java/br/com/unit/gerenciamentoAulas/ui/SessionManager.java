@@ -41,7 +41,8 @@ public class SessionManager {
     }
     
     public boolean podeCriarAula() {
-        return perfilAtual == PerfilUsuario.ADMINISTRADOR;
+        return perfilAtual == PerfilUsuario.ADMINISTRADOR ||
+               perfilAtual == PerfilUsuario.INSTRUTOR;
     }
     
     public boolean podeEditarAula() {
@@ -85,6 +86,14 @@ public class SessionManager {
         return perfilAtual == PerfilUsuario.ADMINISTRADOR;
     }
     
+    public boolean podeCriarAluno() {
+        return perfilAtual == PerfilUsuario.ADMINISTRADOR;
+    }
+    
+    public boolean podeDeletarAluno() {
+        return perfilAtual == PerfilUsuario.ADMINISTRADOR;
+    }
+    
     public boolean podeCriarLocal() {
         return perfilAtual == PerfilUsuario.ADMINISTRADOR;
     }
@@ -98,7 +107,9 @@ public class SessionManager {
     }
     
     public boolean podeCriarInscricao() {
-        return perfilAtual == PerfilUsuario.ALUNO;
+        return perfilAtual == PerfilUsuario.ALUNO ||
+               perfilAtual == PerfilUsuario.ADMINISTRADOR ||
+               perfilAtual == PerfilUsuario.INSTRUTOR;
     }
     
     public boolean podeCancelarInscricao() {
@@ -155,13 +166,16 @@ public class SessionManager {
     private String obterPerfisPermitidos(String acao) {
         if (acao.contains("Criar Aula") || acao.contains("Editar Aula") || 
             acao.contains("Cancelar Aula") || acao.contains("Deletar Aula")) {
-            return "• Administrador";
+            return "• Administrador\n• Instrutor (apenas para criar)";
         }
         if (acao.contains("Editar Conteúdo") || acao.contains("Material")) {
             return "• Administrador\n• Instrutor";
         }
         if (acao.contains("Inscrição") || acao.contains("Inscrever")) {
-            return "• Aluno";
+            return "• Aluno\n• Instrutor\n• Administrador";
+        }
+        if (acao.contains("Aluno")) {
+            return "• Administrador";
         }
         if (acao.contains("Curso") || acao.contains("Instrutor") || 
             acao.contains("Local") || acao.contains("Capacidade")) {
@@ -200,6 +214,12 @@ public class SessionManager {
                 break;
             case "DELETAR_INSTRUTOR":
                 temPermissao = podeDeletarInstrutor();
+                break;
+            case "CRIAR_ALUNO":
+                temPermissao = podeCriarAluno();
+                break;
+            case "DELETAR_ALUNO":
+                temPermissao = podeDeletarAluno();
                 break;
             case "CRIAR_LOCAL":
                 temPermissao = podeCriarLocal();

@@ -1,14 +1,19 @@
 package br.com.unit.gerenciamentoAulas.ui;
 
+import java.awt.Desktop;
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 
+import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarDTO;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import javafx.animation.PauseTransition;
@@ -19,11 +24,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 @Controller
@@ -46,6 +55,7 @@ public class MainController {
     @FXML private TableColumn<AulaTableRow, String> colDataHora;
     @FXML private TableColumn<AulaTableRow, String> colVagas;
     @FXML private TableColumn<AulaTableRow, String> colStatus;
+    @FXML private TableColumn<AulaTableRow, Void> colMaterial;
     @FXML private Label lblTotal;
     @FXML private Label lblTotalAulas;
     @FXML private Label lblProximasAulas;
@@ -87,6 +97,10 @@ public class MainController {
             colDataHora.setStyle("-fx-alignment: CENTER;");
             colVagas.setStyle("-fx-alignment: CENTER;");
             colStatus.setStyle("-fx-alignment: CENTER;");
+            if (colMaterial != null) {
+                colMaterial.setStyle("-fx-alignment: CENTER;");
+                inicializarColunaMaterial();
+            }
             tabelaAulas.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             tabelaAulas.setItems(aulasData);
             System.out.println("✅ Colunas configuradas!");
@@ -134,6 +148,11 @@ public class MainController {
     @FXML
     private void handleInstrutores() {
         carregarPagina("/fxml/pages/Instrutores.fxml");
+    }
+
+    @FXML
+    private void handleAlunos() {
+        carregarPagina("/fxml/pages/Alunos.fxml");
     }
 
     @FXML
@@ -249,7 +268,8 @@ public class MainController {
                 aula.getLocal().getNome(),
                 aula.getDataHoraInicio().format(FORMATTER),
                 aula.getVagasDisponiveis() + "/" + aula.getVagasTotais(),
-                aula.getStatus()
+                aula.getStatus(),
+                aula.possuiMaterialComplementar()
         )));
         lblTotal.setText("Exibindo: " + aulas.size() + " aula(s)");
     }
@@ -289,6 +309,89 @@ public class MainController {
         flashTimer.play();
     }
 
+    private void inicializarColunaMaterial() {
+        colMaterial.setCellFactory(col -> new TableCell<>() {
+            private final Button btnMaterial = new Button("Material");
+
+            {
+                btnMaterial.getStyleClass().add("btn-secondary");
+                btnMaterial.setOnAction(event -> {
+                    AulaTableRow row = getTableView().getItems().get(getIndex());
+                    abrirMaterialComplementar(row);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
+                AulaTableRow row = getTableView().getItems().get(getIndex());
+                btnMaterial.setDisable(row == null || !row.isMaterialDisponivel());
+                setGraphic(btnMaterial);
+            }
+        });
+    }
+
+    private void abrirMaterialComplementar(AulaTableRow row) {
+        if (row == null || row.getId() == null) {
+            mostrarInfo("Material", "Selecione uma aula válida.");
+            return;
+        }
+
+        Optional<MaterialComplementarDTO> materialOpt = aulaService.obterMaterialComplementar(row.getId());
+        materialOpt.ifPresentOrElse(
+                dto -> {
+                    try {
+                        if (dto.possuiLink()) {
+                            abrirLink(dto.getUrl());
+                        } else if (dto.possuiArquivo()) {
+                            salvarArquivoLocal(dto);
+                        } else {
+                            mostrarInfo("Material", "Esta aula não possui material disponível.");
+                        }
+                    } catch (Exception e) {
+                        mostrarErro("Material", "Não foi possível abrir o material: " + e.getMessage());
+                    }
+                },
+                () -> mostrarInfo("Material", "Esta aula não possui material complementar cadastrado.")
+        );
+    }
+
+    private void abrirLink(String url) throws Exception {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("URL do material não foi informada.");
+        }
+        String urlNormalizada = url.startsWith("http://") || url.startsWith("https://")
+                ? url
+                : "https://" + url;
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().browse(new URI(urlNormalizada));
+            mostrarFlash("Material aberto no navegador padrão.", true);
+        } else {
+            mostrarInfo("Material", "Copie o link do material:\n" + urlNormalizada);
+        }
+    }
+
+    private void salvarArquivoLocal(MaterialComplementarDTO dto) throws IOException {
+        if (dto.getArquivo() == null) {
+            throw new IOException("Arquivo do material não foi encontrado.");
+        }
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Salvar material da aula");
+        chooser.setInitialFileName(dto.obterNomeParaDownload());
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Arquivos PDF (*.pdf)", "*.pdf"));
+        Window window = tabelaAulas != null ? tabelaAulas.getScene().getWindow() : null;
+        File destino = chooser.showSaveDialog(window);
+        if (destino == null) {
+            return;
+        }
+        java.nio.file.Files.write(destino.toPath(), dto.getArquivo());
+        mostrarInfo("Material salvo", "Material salvo em: " + destino.getAbsolutePath());
+    }
+
     public static class AulaTableRow {
         private final Long id;
         private final String curso;
@@ -297,9 +400,11 @@ public class MainController {
         private final String dataHora;
         private final String vagas;
         private final String status;
+        private final boolean materialDisponivel;
 
         public AulaTableRow(Long id, String curso, String instrutor, String local,
-                            String dataHora, String vagas, String status) {
+                            String dataHora, String vagas, String status,
+                            boolean materialDisponivel) {
             this.id = id;
             this.curso = curso;
             this.instrutor = instrutor;
@@ -307,6 +412,7 @@ public class MainController {
             this.dataHora = dataHora;
             this.vagas = vagas;
             this.status = status;
+            this.materialDisponivel = materialDisponivel;
         }
 
         public Long getId() { return id; }
@@ -316,5 +422,6 @@ public class MainController {
         public String getDataHora() { return dataHora; }
         public String getVagas() { return vagas; }
         public String getStatus() { return status; }
+        public boolean isMaterialDisponivel() { return materialDisponivel; }
     }
 }

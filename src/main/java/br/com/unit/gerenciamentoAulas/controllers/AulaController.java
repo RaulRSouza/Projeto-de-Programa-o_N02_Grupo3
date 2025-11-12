@@ -326,6 +326,11 @@ public class AulaController {
                 .map(aula -> {
                     aula.limparMaterialComplementar();
                     aula.setMaterialComplementarUrl(request.getUrl().trim());
+                    aula.setMaterialComplementarTitulo(
+                            request.getTitulo() != null ? request.getTitulo().trim() : null);
+                    if (request.getTipo() != null && !request.getTipo().isBlank()) {
+                        aula.setMaterialComplementarTipo(request.getTipo().trim());
+                    }
                     Aula aulaAtualizada = aulaRepository.save(aula);
                     return ResponseEntity.ok(aulaAtualizada);
                 })
@@ -366,6 +371,7 @@ public class AulaController {
 
         aula.setMaterialComplementarTipo(arquivo.getContentType());
         aula.setMaterialComplementarNomeArquivo(arquivo.getOriginalFilename());
+        aula.setMaterialComplementarTitulo(arquivo.getOriginalFilename());
         aula.setMaterialComplementarUrl(null);
 
         Aula aulaAtualizada = aulaRepository.save(aula);
