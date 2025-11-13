@@ -1,5 +1,8 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -11,6 +14,8 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarDTO;
+import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.entidades.Local;
@@ -28,13 +33,16 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 @Controller
 public class CriarAulaController {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    private static final String DEFAULT_CONTENT_TYPE = "application/pdf";
 
     @Autowired
     private AulaService aulaService;
@@ -61,12 +69,23 @@ public class CriarAulaController {
     @FXML private TextArea observacoesArea;
     @FXML private Button salvarButton;
     @FXML private Button cancelarButton;
+    @FXML private TextField materialUrlField;
+    @FXML private TextField materialArquivoField;
+    @FXML private Button selecionarMaterialButton;
+    @FXML private Button limparMaterialButton;
+
+    private byte[] arquivoMaterialSelecionado;
+    private String arquivoMaterialNome;
+    private String arquivoMaterialContentType = DEFAULT_CONTENT_TYPE;
 
     @FXML
     public void initialize() {
         configurarComboBoxes();
         configurarSpinner();
         configurarCamposData();
+        if (materialArquivoField != null) {
+            materialArquivoField.setEditable(false);
+        }
     }
 
     private void configurarComboBoxes() {
@@ -162,7 +181,11 @@ public class CriarAulaController {
                     ? descricaoArea.getText().trim()
                     : "";
 
-            aulaService.criarAula(
+            if (!validarMaterialCampos()) {
+                return;
+            }
+
+            Aula aulaSalva = aulaService.criarAula(
                 curso.getId(),
                 instrutor.getId(),
                 local.getId(),
@@ -173,6 +196,11 @@ public class CriarAulaController {
                 titulo,
                 descricao
             );
+
+            if (possuiMaterialInformado()) {
+                MaterialComplementarDTO materialDTO = construirMaterialDTO(aulaSalva.getId(), titulo);
+                aulaService.salvarMaterialComplementar(aulaSalva.getId(), materialDTO);
+            }
 
             mostrarAlerta("Sucesso", "Aula criada com sucesso!", Alert.AlertType.INFORMATION);
             fecharJanela();
@@ -218,6 +246,94 @@ public class CriarAulaController {
             return false;
         }
         return true;
+    }
+
+    private boolean validarMaterialCampos() {
+        String url = materialUrlField != null && materialUrlField.getText() != null
+                ? materialUrlField.getText().trim()
+                : "";
+        boolean possuiUrl = !url.isBlank();
+        boolean possuiArquivo = arquivoMaterialSelecionado != null && arquivoMaterialSelecionado.length > 0;
+
+        if (possuiUrl && possuiArquivo) {
+            mostrarAlerta("Validação", "Informe apenas URL ou apenas o arquivo do material.", Alert.AlertType.WARNING);
+            return false;
+        }
+        if (possuiArquivo && (arquivoMaterialNome == null || arquivoMaterialNome.isBlank())) {
+            mostrarAlerta("Validação", "Selecione um arquivo válido para o material.", Alert.AlertType.WARNING);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean possuiMaterialInformado() {
+        String url = materialUrlField != null && materialUrlField.getText() != null
+                ? materialUrlField.getText().trim()
+                : "";
+        boolean possuiUrl = !url.isBlank();
+        boolean possuiArquivo = arquivoMaterialSelecionado != null && arquivoMaterialSelecionado.length > 0;
+        return possuiUrl || possuiArquivo;
+    }
+
+    private MaterialComplementarDTO construirMaterialDTO(Long aulaId, String tituloAula) {
+        String tituloMaterial = tituloAula != null && !tituloAula.isBlank()
+                ? tituloAula + " - Material"
+                : "Material complementar";
+        String url = materialUrlField != null && materialUrlField.getText() != null
+                ? materialUrlField.getText().trim()
+                : "";
+        if (!url.isBlank()) {
+            return MaterialComplementarDTO.criarLink(aulaId, tituloMaterial, url);
+        }
+        return MaterialComplementarDTO.criarArquivo(
+                aulaId,
+                tituloMaterial,
+                arquivoMaterialNome,
+                arquivoMaterialContentType,
+                arquivoMaterialSelecionado
+        );
+    }
+
+    @FXML
+    private void selecionarArquivoMaterial() {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Selecionar material complementar (PDF)");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Arquivos PDF (*.pdf)", "*.pdf"));
+            Window owner = selecionarMaterialButton != null ? selecionarMaterialButton.getScene().getWindow() : null;
+            File arquivo = fileChooser.showOpenDialog(owner);
+            if (arquivo == null) {
+                return;
+            }
+            byte[] conteudo = Files.readAllBytes(arquivo.toPath());
+            if (conteudo.length == 0) {
+                mostrarAlerta("Arquivo inválido", "O arquivo selecionado está vazio.", Alert.AlertType.WARNING);
+                return;
+            }
+            arquivoMaterialSelecionado = conteudo;
+            arquivoMaterialNome = arquivo.getName();
+            String contentType = Files.probeContentType(arquivo.toPath());
+            arquivoMaterialContentType = contentType != null ? contentType : DEFAULT_CONTENT_TYPE;
+            if (materialArquivoField != null) {
+                materialArquivoField.setText(arquivoMaterialNome);
+            }
+            if (materialUrlField != null) {
+                materialUrlField.clear();
+            }
+        } catch (IOException e) {
+            mostrarAlerta("Erro", "Não foi possível ler o arquivo selecionado.", Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void limparMaterialSelecionado() {
+        arquivoMaterialSelecionado = null;
+        arquivoMaterialNome = null;
+        arquivoMaterialContentType = DEFAULT_CONTENT_TYPE;
+        if (materialArquivoField != null) {
+            materialArquivoField.clear();
+        }
     }
 
     private boolean validarHora(String hora) {

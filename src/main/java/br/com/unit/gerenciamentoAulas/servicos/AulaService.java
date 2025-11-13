@@ -2,6 +2,7 @@ package br.com.unit.gerenciamentoAulas.servicos;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.entidades.Inscricao;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.entidades.Local;
+import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarDTO;
 import br.com.unit.gerenciamentoAulas.exceptions.AulaNotFoundException;
 import br.com.unit.gerenciamentoAulas.exceptions.BusinessException;
 import br.com.unit.gerenciamentoAulas.exceptions.ConflictException;
@@ -171,6 +173,51 @@ public class AulaService {
         return aulaAtualizada;
     }
 
+    public Aula salvarMaterialComplementar(Long aulaId, MaterialComplementarDTO dto) {
+        Aula aula = aulaRepository.findById(aulaId)
+                .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
+
+        if (dto == null) {
+            aula.limparMaterialComplementar();
+            return aulaRepository.save(aula);
+        }
+
+        boolean possuiUrl = dto.getUrl() != null && !dto.getUrl().isBlank();
+        boolean possuiArquivo = dto.getArquivo() != null && dto.getArquivo().length > 0;
+
+        if (possuiUrl && possuiArquivo) {
+            throw new BusinessException("Material complementar deve ser um link OU um arquivo.");
+        }
+
+        aula.limparMaterialComplementar();
+
+        if (possuiUrl) {
+            aula.setMaterialComplementarUrl(dto.getUrl().trim());
+            aula.setMaterialComplementarTitulo(dto.getTitulo());
+            if (dto.getContentType() != null && !dto.getContentType().isBlank()) {
+                aula.setMaterialComplementarTipo(dto.getContentType());
+            }
+            return aulaRepository.save(aula);
+        }
+
+        if (possuiArquivo) {
+            aula.setMaterialComplementarArquivo(dto.getArquivo());
+            String nomeArquivo = dto.getNomeArquivo();
+            if (nomeArquivo == null || nomeArquivo.isBlank()) {
+                nomeArquivo = dto.obterNomeParaDownload();
+            }
+            aula.setMaterialComplementarNomeArquivo(nomeArquivo);
+            aula.setMaterialComplementarTitulo(
+                    dto.getTitulo() != null ? dto.getTitulo() : nomeArquivo);
+            aula.setMaterialComplementarTipo(
+                    dto.getContentType() != null ? dto.getContentType() : "application/pdf");
+            return aulaRepository.save(aula);
+        }
+
+        // Nenhum material informado -> apenas persiste limpeza
+        return aulaRepository.save(aula);
+    }
+
     /**
      * @param aulaId
      * @param motivo
@@ -311,6 +358,23 @@ public class AulaService {
         return aulaRepository.findAulasPorPeriodo(inicio, fim);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<MaterialComplementarDTO> obterMaterialComplementar(Long aulaId) {
+        return aulaRepository.findById(aulaId)
+                .map(aula -> {
+                    MaterialComplementarDTO dto = new MaterialComplementarDTO();
+                    dto.setAulaId(aula.getId());
+                    dto.setTitulo(aula.getMaterialComplementarTitulo());
+                    dto.setUrl(aula.getMaterialComplementarUrl());
+                    dto.setNomeArquivo(aula.getMaterialComplementarNomeArquivo());
+                    dto.setContentType(aula.getMaterialComplementarTipo());
+                    if (aula.getMaterialComplementarArquivo() != null) {
+                        dto.setArquivo(aula.getMaterialComplementarArquivo());
+                    }
+                    return dto;
+                })
+                .filter(dto -> dto.possuiLink() || dto.possuiArquivo());
+    }
 
 
 

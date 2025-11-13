@@ -49,6 +49,8 @@
                     styleClass="sidebar-btn" maxWidth="Infinity"/>
             <Button text="👨‍🏫 Instrutores" onAction="#handleInstrutores" 
                     styleClass="sidebar-btn" maxWidth="Infinity"/>
+            <Button text="👨‍🎓 Alunos" onAction="#handleAlunos" 
+                    styleClass="sidebar-btn" maxWidth="Infinity"/>
             <Button text="📍 Locais" onAction="#handleLocais" 
                     styleClass="sidebar-btn" maxWidth="Infinity"/>
             <Button text="👥 Inscrições" onAction="#handleInscricoes" 
@@ -130,6 +132,7 @@
                             <TableColumn fx:id="colDataHora" text="Data/Hora" prefWidth="140"/>
                             <TableColumn fx:id="colVagas" text="Vagas" prefWidth="100"/>
                             <TableColumn fx:id="colStatus" text="Status" prefWidth="110"/>
+                            <TableColumn fx:id="colMaterial" text="Material" prefWidth="130"/>
                         </columns>
                     </TableView>
 

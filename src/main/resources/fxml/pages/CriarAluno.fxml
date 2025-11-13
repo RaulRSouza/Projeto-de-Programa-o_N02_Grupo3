@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.CriarAlunoController"
+            prefWidth="520" prefHeight="620">
+
+    <center>
+        <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
+            <padding>
+                <Insets top="24" right="32" bottom="24" left="32"/>
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Cadastrar Novo Aluno" styleClass="page-title">
+                    <font>
+                        <Font name="System Bold" size="20"/>
+                    </font>
+                </Label>
+                <Label text="Informe os dados de acesso e matrícula do aluno." styleClass="text-muted"/>
+            </VBox>
+
+            <GridPane hgap="18" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <Label text="Nome completo*" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="nomeField" promptText="Ex.: Marina Dias"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="E-mail institucional*" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="emailField" promptText="aluno@veridia.edu"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="CPF*" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="cpfField" promptText="000.000.000-00"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Telefone" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="telefoneField" promptText="(00) 00000-0000"
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Curso*" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="cursoField" promptText="Ex.: Desenvolvimento Web"
+                           GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <Label text="Matrícula*" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="matriculaField" promptText="ALU-2024-001"
+                           GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <Label text="Senha de acesso*" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <PasswordField fx:id="senhaField" promptText="Defina uma senha inicial"
+                               GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <HBox alignment="CENTER_RIGHT" spacing="12">
+                <Button fx:id="cancelarButton" text="Cancelar" onAction="#cancelar"
+                        styleClass="btn-secondary"/>
+                <Button fx:id="salvarButton" text="Salvar Aluno" onAction="#salvarAluno"
+                        styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
+

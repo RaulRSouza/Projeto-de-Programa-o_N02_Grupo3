@@ -3,6 +3,8 @@ package br.com.unit.gerenciamentoAulas.controllers;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
+import br.com.unit.gerenciamentoAulas.entidades.Usuario;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
+import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
 
 @RestController
 @RequestMapping("/api/instrutores")
@@ -28,6 +32,9 @@ public class InstrutorController {
 
     @Autowired
     private InstrutorRepository instrutorRepository;
+    
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @GetMapping
     public ResponseEntity<List<Instrutor>> listarTodos() {
@@ -55,6 +62,16 @@ public class InstrutorController {
                 return ResponseEntity.badRequest().body("Registro é obrigatório");
             }
 
+            if (usuarioRepository.existsByEmail(instrutor.getEmail())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("E-mail já cadastrado para outro usuário");
+            }
+            if (instrutor.getCpf() != null && !instrutor.getCpf().trim().isEmpty()
+                    && usuarioRepository.existsByCpf(instrutor.getCpf())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("CPF já cadastrado para outro usuário");
+            }
+
             if (instrutorRepository.existsByRegistro(instrutor.getRegistro())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("Registro já cadastrado");
@@ -76,6 +93,11 @@ public class InstrutorController {
                         instrutor.setNome(instrutorAtualizado.getNome());
                     }
                     if (instrutorAtualizado.getEmail() != null) {
+                        Optional<Usuario> existente = usuarioRepository.findByEmail(instrutorAtualizado.getEmail());
+                        if (existente.isPresent() && !existente.get().getId().equals(instrutor.getId())) {
+                            return ResponseEntity.status(HttpStatus.CONFLICT)
+                                    .body("E-mail já cadastrado para outro usuário");
+                        }
                         instrutor.setEmail(instrutorAtualizado.getEmail());
                     }
                     if (instrutorAtualizado.getTelefone() != null) {
@@ -83,6 +105,22 @@ public class InstrutorController {
                     }
                     if (instrutorAtualizado.getEspecialidade() != null) {
                         instrutor.setEspecialidade(instrutorAtualizado.getEspecialidade());
+                    }
+                    if (instrutorAtualizado.getRegistro() != null &&
+                            !instrutorAtualizado.getRegistro().equals(instrutor.getRegistro())) {
+                        if (instrutorRepository.existsByRegistro(instrutorAtualizado.getRegistro())) {
+                            return ResponseEntity.status(HttpStatus.CONFLICT)
+                                    .body("Registro já cadastrado");
+                        }
+                        instrutor.setRegistro(instrutorAtualizado.getRegistro());
+                    }
+                    if (instrutorAtualizado.getCpf() != null) {
+                        Optional<Usuario> cpfExistente = usuarioRepository.findByCpf(instrutorAtualizado.getCpf());
+                        if (cpfExistente.isPresent() && !cpfExistente.get().getId().equals(instrutor.getId())) {
+                            return ResponseEntity.status(HttpStatus.CONFLICT)
+                                    .body("CPF já cadastrado para outro usuário");
+                        }
+                        instrutor.setCpf(instrutorAtualizado.getCpf());
                     }
                     
                     Instrutor instrutorSalvo = instrutorRepository.save(instrutor);
