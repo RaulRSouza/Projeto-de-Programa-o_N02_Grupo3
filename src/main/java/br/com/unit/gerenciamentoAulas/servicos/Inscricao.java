@@ -15,11 +15,6 @@ import java.util.stream.Collectors;
 import br.com.unit.gerenciamentoAulas.entidades.Aluno;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 
-/**
- * Serviço que centraliza as regras de negócio relacionadas às inscrições
- * de alunos nas aulas presenciais. Trabalha em conjunto com {@link GestaoAula}
- * para garantir consistência de vagas, horários e status de inscrição.
- */
 public class Inscricao {
     private final GestaoAula gestaoAula;
     private final Map<Long, br.com.unit.gerenciamentoAulas.entidades.Inscricao> inscricoesPorId;
@@ -31,15 +26,6 @@ public class Inscricao {
         this.sequenciaInscricao = new AtomicLong(1L);
     }
 
-    /**
-     * Fluxo principal do modo Aluno: realiza a inscrição em uma aula,
-     * respeitando limite de vagas, conflitos de horário e status da aula.
-     *
-     * @param aulaId id da aula desejada
-     * @param aluno aluno que está solicitando a vaga
-     * @param observacoes anotações opcionais fornecidas pelo aluno
-     * @return inscrição criada quando válida
-     */
     public Optional<br.com.unit.gerenciamentoAulas.entidades.Inscricao> inscreverAluno(Long aulaId,
                                                                                        Aluno aluno,
                                                                                        String observacoes) {
@@ -93,15 +79,6 @@ public class Inscricao {
         return Optional.of(novaInscricao);
     }
 
-    /**
-     * Fluxo complementar do modo Aluno: cancelamento de inscrição
-     * com reaproveitamento da vaga.
-     *
-     * @param aulaId id da aula
-     * @param alunoId id do aluno
-     * @param motivo justificativa informada
-     * @return verdadeiro quando o cancelamento é efetuado
-     */
     public boolean cancelarInscricao(Long aulaId, Long alunoId, String motivo) {
         Optional<br.com.unit.gerenciamentoAulas.entidades.Inscricao> inscricaoOpt =
                 localizarInscricao(aulaId, alunoId);
@@ -130,14 +107,6 @@ public class Inscricao {
         return true;
     }
 
-    /**
-     * Fluxo do modo Instrutor/Admin: confirmação de presença manual dos inscritos.
-     *
-     * @param aulaId id da aula
-     * @param alunoId id do aluno cujo comparecimento foi confirmado
-     * @param dataConfirmacao horário da confirmação
-     * @return verdadeiro quando o status é alterado para PRESENTE
-     */
     public boolean confirmarPresenca(Long aulaId, Long alunoId, LocalDateTime dataConfirmacao) {
         Optional<br.com.unit.gerenciamentoAulas.entidades.Inscricao> inscricaoOpt =
                 localizarInscricao(aulaId, alunoId);
@@ -163,9 +132,6 @@ public class Inscricao {
         return true;
     }
 
-    /**
-     * Recupera as inscrições ativas (CONFIRMADA ou PRESENTE) de um aluno.
-     */
     public List<br.com.unit.gerenciamentoAulas.entidades.Inscricao> listarInscricoesAtivas(Aluno aluno) {
         if (aluno == null) {
             return Collections.emptyList();
@@ -177,9 +143,6 @@ public class Inscricao {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Lista as inscrições do dia para um aluno – utilizado no fluxo rápido da agenda.
-     */
     public List<br.com.unit.gerenciamentoAulas.entidades.Inscricao> listarInscricoesDoDia(Aluno aluno, LocalDate data) {
         if (aluno == null || data == null) {
             return Collections.emptyList();
@@ -190,9 +153,6 @@ public class Inscricao {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Fornece um snapshot consolidado por status das inscrições de uma aula.
-     */
     public Map<String, Long> consolidarPorStatus(Long aulaId) {
         Optional<Aula> aulaOpt = gestaoAula.buscarAulaPorId(aulaId);
         if (!aulaOpt.isPresent()) {
@@ -206,9 +166,6 @@ public class Inscricao {
                 ));
     }
 
-    /**
-     * Sugere aulas com vagas disponíveis para o aluno considerando evitar conflitos.
-     */
     public List<Aula> sugerirAulasParaAluno(Aluno aluno) {
         if (aluno == null) {
             return Collections.emptyList();

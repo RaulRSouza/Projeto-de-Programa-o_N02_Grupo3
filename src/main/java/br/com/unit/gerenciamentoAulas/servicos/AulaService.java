@@ -22,9 +22,6 @@ import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
 
-/**
- * @author Grupo 3 - Sistema de Gerenciamento de Aulas de Véridia
- */
 @Service
 @Transactional
 public class AulaService {
@@ -41,20 +38,6 @@ public class AulaService {
     @Autowired
     private LocalRepository localRepository;
 
-    /**
-     * @param cursoId
-     * @param instrutorId
-     * @param localId
-     * @param dataHoraInicio 
-     * @param dataHoraFim
-     * @param vagasTotais 
-     * @param observacoes 
-     * @param titulo
-     * @param descricao
-     * @return
-     * @throws BusinessException
-     * @throws ConflictException 
-     */
     public Aula criarAula(Long cursoId, Long instrutorId, Long localId,
                           LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim,
                           int vagasTotais, String observacoes,
@@ -97,20 +80,6 @@ public class AulaService {
         return aulaSalva;
     }
 
-    /**
-     * @param aulaId
-     * @param cursoId 
-     * @param instrutorId
-     * @param localId
-     * @param dataHoraInicio
-     * @param dataHoraFim
-     * @param vagasTotais
-     * @param observacoes
-     * @return
-     * @throws AulaNotFoundException
-     * @throws BusinessException
-     * @throws ConflictException
-     */
     public Aula editarAula(Long aulaId, Long cursoId, Long instrutorId, Long localId,
                           LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim,
                           int vagasTotais, String observacoes,
@@ -214,17 +183,9 @@ public class AulaService {
             return aulaRepository.save(aula);
         }
 
-        // Nenhum material informado -> apenas persiste limpeza
         return aulaRepository.save(aula);
     }
 
-    /**
-     * @param aulaId
-     * @param motivo
-     * @return
-     * @throws AulaNotFoundException
-     * @throws BusinessException
-     */
     public Aula cancelarAula(Long aulaId, String motivo) {
         Aula aula = aulaRepository.findById(aulaId)
                 .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
@@ -252,9 +213,6 @@ public class AulaService {
         return aulaCancelada;
     }
 
-    /**
-     * Remove definitivamente uma aula se ela nao estiver em andamento ou concluida.
-     */
     public void deletarAula(Long aulaId) {
         Aula aula = aulaRepository.findById(aulaId)
                 .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
@@ -270,29 +228,17 @@ public class AulaService {
         aulaRepository.delete(aula);
     }
 
-    /**
-     * @param aulaId
-     * @return 
-     * @throws AulaNotFoundException
-     */
     @Transactional(readOnly = true)
     public Aula buscarPorId(Long aulaId) {
         return aulaRepository.findById(aulaId)
                 .orElseThrow(() -> new AulaNotFoundException("Aula não encontrada com ID: " + aulaId));
     }
 
-    /**
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarTodas() {
         return aulaRepository.findAll();
     }
 
-    /**     
-     * @param cursoId 
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarPorCurso(Long cursoId) {
         Curso curso = cursoRepository.findById(cursoId)
@@ -300,10 +246,6 @@ public class AulaService {
         return aulaRepository.findByCurso(curso);
     }
 
-    /**
-     * @param instrutorId 
-     * @return 
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarPorInstrutor(Long instrutorId) {
         Instrutor instrutor = instrutorRepository.findById(instrutorId)
@@ -311,10 +253,6 @@ public class AulaService {
         return aulaRepository.findByInstrutor(instrutor);
     }
 
-    /**
-     * @param localId
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarPorLocal(Long localId) {
         Local local = localRepository.findById(localId)
@@ -322,36 +260,21 @@ public class AulaService {
         return aulaRepository.findByLocal(local);
     }
 
-    /**
-     * @param status
-     * @return 
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarPorStatus(String status) {
         return aulaRepository.findByStatus(status);
     }
 
-    /**
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarAulasFuturas() {
         return aulaRepository.findAulasFuturas(LocalDateTime.now());
     }
 
-    /**
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarAulasDisponiveis() {
         return aulaRepository.findAulasComVagasDisponiveis(LocalDateTime.now());
     }
 
-    /**
-     * @param inicio 
-     * @param fim 
-     * @return
-     */
     @Transactional(readOnly = true)
     public List<Aula> listarPorPeriodo(LocalDateTime inicio, LocalDateTime fim) {
         validarDatasAula(inicio, fim);
@@ -428,9 +351,6 @@ public class AulaService {
         }
     }
 
-    /**
-     * @param aulaIdExcluir
-     */
     private void validarConflitoInstrutor(Instrutor instrutor, LocalDateTime inicio,
                                          LocalDateTime fim, Long aulaIdExcluir) {
         List<Aula> aulasInstrutor = aulaRepository.findByInstrutor(instrutor);
@@ -454,9 +374,6 @@ public class AulaService {
         }
     }
 
-    /**
-     * @param aulaIdExcluir
-     */
     private void validarConflitoLocal(Local local, LocalDateTime inicio,
                                      LocalDateTime fim, Long aulaIdExcluir) {
         List<Aula> aulasLocal = aulaRepository.findByLocal(local);
