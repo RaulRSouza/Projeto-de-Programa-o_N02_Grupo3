@@ -16,6 +16,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     List<Aluno> findByCurso(String curso);
     
     boolean existsByMatricula(String matricula);
+
+    boolean existsByEmail(String email);
     
     Optional<Aluno> findByEmail(String email);
 }

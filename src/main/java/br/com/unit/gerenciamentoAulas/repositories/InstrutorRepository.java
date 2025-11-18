@@ -19,6 +19,10 @@ public interface InstrutorRepository extends JpaRepository<Instrutor, Long> {
     List<Instrutor> findByEspecialidade(String especialidade);
     
     boolean existsByRegistro(String registro);
+
+    Optional<Instrutor> findByEmail(String email);
+
+    boolean existsByEmail(String email);
     
     @Query("SELECT i FROM Instrutor i WHERE i.id NOT IN " +
            "(SELECT a.instrutor.id FROM Aula a WHERE " +

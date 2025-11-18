@@ -12,6 +12,12 @@ import jakarta.persistence.Table;
 @Table(name = "instrutores")
 public class Instrutor extends Usuario {
     
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+    
+    @Column(nullable = false)
+    private String senha;
+    
     @Column(length = 100)
     private String especialidade;
     
@@ -26,12 +32,30 @@ public class Instrutor extends Usuario {
         this.aulasMinistradas = new ArrayList<>();
     }
 
-    public Instrutor(Long id, String nome, String email, String senha, String cpf, 
-                     String telefone, String especialidade, String registro) {
-        super(id, nome, email, senha, cpf, telefone);
+    public Instrutor(Long id, String nome, String cpf, String telefone, 
+                     String email, String senha, String especialidade, String registro) {
+        super(id, nome, cpf, telefone);
+        this.email = email;
+        this.senha = senha;
         this.especialidade = especialidade;
         this.registro = registro;
         this.aulasMinistradas = new ArrayList<>();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 
     public String getEspecialidade() {
@@ -73,7 +97,7 @@ public class Instrutor extends Usuario {
                 ", nome='" + getNome() + '\'' +
                 ", especialidade='" + especialidade + '\'' +
                 ", registro='" + registro + '\'' +
-                ", email='" + getEmail() + '\'' +
+                ", email='" + email + '\'' +
                 '}';
     }
 }

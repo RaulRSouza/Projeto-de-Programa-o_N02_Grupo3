@@ -43,7 +43,7 @@ public class CriarAlunoController {
             String cpf = cpfField.getText().trim();
             String matricula = matriculaField.getText().trim();
 
-            if (usuarioRepository.existsByEmail(email)) {
+            if (alunoRepository.existsByEmail(email)) {
                 mostrarAlerta("Validação", "Já existe usuário com este e-mail.", Alert.AlertType.WARNING);
                 return;
             }
