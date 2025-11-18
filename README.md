@@ -119,7 +119,6 @@ Acesse o console do banco de dados em: `http://localhost:9090/h2-console`
 **Credenciais:**
 - JDBC URL: `jdbc:h2:file:./data/veridiadb`
 - Username: `dev`
-- Password: `123456`
 
 ### Interface do Usuário
 
