@@ -47,8 +47,8 @@ public class UsuarioController {
         return usuarioRepository.findById(id)
                 .map(user -> {
                     user.setNome(dadosAtualizados.getNome());
-                    user.setEmail(dadosAtualizados.getEmail());
-                    user.setSenha(dadosAtualizados.getSenha());
+                    user.setCpf(dadosAtualizados.getCpf());
+                    user.setTelefone(dadosAtualizados.getTelefone());
                     return ResponseEntity.ok(usuarioRepository.save(user));
                 })
                 .orElse(ResponseEntity.notFound().build());

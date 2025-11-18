@@ -1,5 +1,8 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
@@ -9,8 +12,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 
 @Controller
 public class CriarInstrutorController {
@@ -48,7 +49,7 @@ public class CriarInstrutorController {
             
             instrutor.setSenha(senhaField.getText().trim());
 
-            if (usuarioRepository.existsByEmail(instrutor.getEmail())) {
+            if (instrutorRepository.existsByEmail(instrutor.getEmail())) {
                 mostrarAlerta("Validação", "Já existe usuário com este e-mail.", Alert.AlertType.WARNING);
                 return;
             }

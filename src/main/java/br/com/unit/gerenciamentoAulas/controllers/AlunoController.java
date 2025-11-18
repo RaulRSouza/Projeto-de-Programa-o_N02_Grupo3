@@ -1,7 +1,6 @@
 package br.com.unit.gerenciamentoAulas.controllers;
 
 import java.util.List;
-
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.unit.gerenciamentoAulas.entidades.Aluno;
-import br.com.unit.gerenciamentoAulas.entidades.Usuario;
 import br.com.unit.gerenciamentoAulas.repositories.AlunoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
 
@@ -62,10 +60,11 @@ public class AlunoController {
                 return ResponseEntity.badRequest().body("Matrícula é obrigatória");
             }
 
-            if (usuarioRepository.existsByEmail(aluno.getEmail())) {
+            if (alunoRepository.findByEmail(aluno.getEmail()).isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("E-mail já cadastrado para outro usuário");
+                        .body("E-mail já cadastrado para outro aluno");
             }
+            
             if (usuarioRepository.existsByCpf(aluno.getCpf())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("CPF já cadastrado para outro usuário");
@@ -92,16 +91,19 @@ public class AlunoController {
                         aluno.setNome(alunoAtualizado.getNome());
                     }
                     if (alunoAtualizado.getEmail() != null) {
-                        Optional<Usuario> existente = usuarioRepository.findByEmail(alunoAtualizado.getEmail());
+                        Optional<Aluno> existente = alunoRepository.findByEmail(alunoAtualizado.getEmail());
                         if (existente.isPresent() && !existente.get().getId().equals(aluno.getId())) {
                             return ResponseEntity.status(HttpStatus.CONFLICT)
-                                    .body("E-mail já cadastrado para outro usuário");
+                                    .body("E-mail já cadastrado para outro aluno");
                         }
                         aluno.setEmail(alunoAtualizado.getEmail());
                     }
+                    if (alunoAtualizado.getSenha() != null) {
+                        aluno.setSenha(alunoAtualizado.getSenha());
+                    }
                     if (alunoAtualizado.getCpf() != null) {
-                        Optional<Usuario> cpfExistente = usuarioRepository.findByCpf(alunoAtualizado.getCpf());
-                        if (cpfExistente.isPresent() && !cpfExistente.get().getId().equals(aluno.getId())) {
+                        if (usuarioRepository.existsByCpf(alunoAtualizado.getCpf()) && 
+                                !aluno.getCpf().equals(alunoAtualizado.getCpf())) {
                             return ResponseEntity.status(HttpStatus.CONFLICT)
                                     .body("CPF já cadastrado para outro usuário");
                         }

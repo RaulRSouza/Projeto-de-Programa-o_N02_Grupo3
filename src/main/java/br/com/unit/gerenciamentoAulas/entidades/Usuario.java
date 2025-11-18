@@ -23,12 +23,6 @@ public abstract class Usuario {
     @Column(nullable = false, length = 100)
     private String nome;
     
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
-    
-    @Column(nullable = false)
-    private String senha;
-    
     @Column(nullable = false, unique = true, length = 14)
     private String cpf;
     
@@ -37,11 +31,9 @@ public abstract class Usuario {
 
     public Usuario() {}
 
-    public Usuario(Long id, String nome, String email, String senha, String cpf, String telefone) {
+    public Usuario(Long id, String nome, String cpf, String telefone) {
         this.id = id;
         this.nome = nome;
-        this.email = email;
-        this.senha = senha;
         this.cpf = cpf;
         this.telefone = telefone;
     }
@@ -60,22 +52,6 @@ public abstract class Usuario {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 
     public String getCpf() {
@@ -107,9 +83,6 @@ public abstract class Usuario {
         return Objects.hash(id);
     }
 
-    /**
-     * Retorna o perfil do usuário baseado no tipo da classe
-     */
     public PerfilUsuario getPerfil() {
         if (this instanceof Administrador) {
             return PerfilUsuario.ADMINISTRADOR;
@@ -126,7 +99,6 @@ public abstract class Usuario {
         return "Usuario{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", email='" + email + '\'' +
                 ", cpf='" + cpf + '\'' +
                 ", telefone='" + telefone + '\'' +
                 '}';

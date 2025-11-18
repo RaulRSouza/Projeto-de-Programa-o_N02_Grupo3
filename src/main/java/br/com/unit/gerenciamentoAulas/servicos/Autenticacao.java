@@ -10,26 +10,58 @@ import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.entidades.Usuario;
 
 public class Autenticacao {
-    private Map<String, Usuario> usuarios;
-    private Usuario usuarioLogado;
+    private Map<String, Object> usuariosPorEmail;
+    private Object usuarioLogado;
 
     public Autenticacao() {
-        this.usuarios = new HashMap<>();
+        this.usuariosPorEmail = new HashMap<>();
     }
 
-    public boolean registrarUsuario(Usuario usuario) {
-        if (usuario == null || usuario.getEmail() == null || usuario.getSenha() == null) {
-            System.out.println("Dados do usuário inválidos");
+    public boolean registrarAluno(Aluno aluno) {
+        if (aluno == null || aluno.getEmail() == null || aluno.getSenha() == null) {
+            System.out.println("Dados do aluno inválidos");
             return false;
         }
 
-        if (usuarios.containsKey(usuario.getEmail())) {
+        if (usuariosPorEmail.containsKey(aluno.getEmail())) {
             System.out.println("Email já cadastrado no sistema");
             return false;
         }
 
-        usuarios.put(usuario.getEmail(), usuario);
-        System.out.println("Usuário registrado com sucesso: " + usuario.getNome());
+        usuariosPorEmail.put(aluno.getEmail(), aluno);
+        System.out.println("Aluno registrado com sucesso: " + aluno.getNome());
+        return true;
+    }
+
+    public boolean registrarInstrutor(Instrutor instrutor) {
+        if (instrutor == null || instrutor.getEmail() == null || instrutor.getSenha() == null) {
+            System.out.println("Dados do instrutor inválidos");
+            return false;
+        }
+
+        if (usuariosPorEmail.containsKey(instrutor.getEmail())) {
+            System.out.println("Email já cadastrado no sistema");
+            return false;
+        }
+
+        usuariosPorEmail.put(instrutor.getEmail(), instrutor);
+        System.out.println("Instrutor registrado com sucesso: " + instrutor.getNome());
+        return true;
+    }
+
+    public boolean registrarAdministrador(Administrador administrador) {
+        if (administrador == null || administrador.getEmail() == null || administrador.getSenha() == null) {
+            System.out.println("Dados do administrador inválidos");
+            return false;
+        }
+
+        if (usuariosPorEmail.containsKey(administrador.getEmail())) {
+            System.out.println("Email já cadastrado no sistema");
+            return false;
+        }
+
+        usuariosPorEmail.put(administrador.getEmail(), administrador);
+        System.out.println("Administrador registrado com sucesso: " + administrador.getNome());
         return true;
     }
 
@@ -39,32 +71,53 @@ public class Autenticacao {
             return false;
         }
 
-        Usuario usuario = usuarios.get(email);
+        Object usuario = usuariosPorEmail.get(email);
         
         if (usuario == null) {
             System.out.println("Usuário não encontrado");
             return false;
         }
 
-        if (!usuario.getSenha().equals(senha)) {
+        String senhaArmazenada = null;
+        String nomeUsuario = null;
+
+        if (usuario instanceof Aluno) {
+            Aluno aluno = (Aluno) usuario;
+            senhaArmazenada = aluno.getSenha();
+            nomeUsuario = aluno.getNome();
+        } else if (usuario instanceof Instrutor) {
+            Instrutor instrutor = (Instrutor) usuario;
+            senhaArmazenada = instrutor.getSenha();
+            nomeUsuario = instrutor.getNome();
+        } else if (usuario instanceof Administrador) {
+            Administrador admin = (Administrador) usuario;
+            senhaArmazenada = admin.getSenha();
+            nomeUsuario = admin.getNome();
+        }
+
+        if (senhaArmazenada == null || !senhaArmazenada.equals(senha)) {
             System.out.println("Senha incorreta");
             return false;
         }
 
         usuarioLogado = usuario;
-        System.out.println("Login realizado com sucesso: " + usuario.getNome());
+        System.out.println("Login realizado com sucesso: " + nomeUsuario);
         return true;
     }
 
     public void logout() {
         if (usuarioLogado != null) {
-            System.out.println("Logout realizado: " + usuarioLogado.getNome());
+            String nome = getNomeUsuarioLogado();
+            System.out.println("Logout realizado: " + nome);
             usuarioLogado = null;
         }
     }
 
     public Optional<Usuario> getUsuarioLogado() {
-        return Optional.ofNullable(usuarioLogado);
+        if (usuarioLogado instanceof Usuario) {
+            return Optional.of((Usuario) usuarioLogado);
+        }
+        return Optional.empty();
     }
 
     public Optional<Aluno> getAlunoLogado() {
@@ -110,31 +163,75 @@ public class Autenticacao {
             return false;
         }
 
-        if (!usuarioLogado.getSenha().equals(senhaAtual)) {
-            System.out.println("Senha atual incorreta");
-            return false;
-        }
-
         if (novaSenha == null || novaSenha.length() < 6) {
             System.out.println("Nova senha deve ter pelo menos 6 caracteres");
             return false;
         }
 
-        usuarioLogado.setSenha(novaSenha);
+        if (usuarioLogado instanceof Aluno) {
+            Aluno aluno = (Aluno) usuarioLogado;
+            if (!aluno.getSenha().equals(senhaAtual)) {
+                System.out.println("Senha atual incorreta");
+                return false;
+            }
+            aluno.setSenha(novaSenha);
+        } else if (usuarioLogado instanceof Instrutor) {
+            Instrutor instrutor = (Instrutor) usuarioLogado;
+            if (!instrutor.getSenha().equals(senhaAtual)) {
+                System.out.println("Senha atual incorreta");
+                return false;
+            }
+            instrutor.setSenha(novaSenha);
+        } else if (usuarioLogado instanceof Administrador) {
+            Administrador admin = (Administrador) usuarioLogado;
+            if (!admin.getSenha().equals(senhaAtual)) {
+                System.out.println("Senha atual incorreta");
+                return false;
+            }
+            admin.setSenha(novaSenha);
+        } else {
+            System.out.println("Tipo de usuário não reconhecido");
+            return false;
+        }
+
         System.out.println("Senha alterada com sucesso");
         return true;
     }
 
-    public Optional<Usuario> buscarUsuarioPorEmail(String email) {
-        return Optional.ofNullable(usuarios.get(email));
+    public Optional<Object> buscarUsuarioPorEmail(String email) {
+        return Optional.ofNullable(usuariosPorEmail.get(email));
     }
 
-    public Map<String, Usuario> listarUsuarios() {
+    public Optional<Aluno> buscarAlunoPorEmail(String email) {
+        Object usuario = usuariosPorEmail.get(email);
+        if (usuario instanceof Aluno) {
+            return Optional.of((Aluno) usuario);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Instrutor> buscarInstrutorPorEmail(String email) {
+        Object usuario = usuariosPorEmail.get(email);
+        if (usuario instanceof Instrutor) {
+            return Optional.of((Instrutor) usuario);
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Administrador> buscarAdministradorPorEmail(String email) {
+        Object usuario = usuariosPorEmail.get(email);
+        if (usuario instanceof Administrador) {
+            return Optional.of((Administrador) usuario);
+        }
+        return Optional.empty();
+    }
+
+    public Map<String, Object> listarUsuarios() {
         if (!isAdministrador()) {
             System.out.println("Apenas administradores podem listar usuários");
             return new HashMap<>();
         }
-        return new HashMap<>(usuarios);
+        return new HashMap<>(usuariosPorEmail);
     }
 
     public boolean removerUsuario(String email) {
@@ -143,12 +240,23 @@ public class Autenticacao {
             return false;
         }
 
-        if (usuarios.remove(email) != null) {
+        if (usuariosPorEmail.remove(email) != null) {
             System.out.println("Usuário removido com sucesso");
             return true;
         }
 
         System.out.println("Usuário não encontrado");
         return false;
+    }
+
+    private String getNomeUsuarioLogado() {
+        if (usuarioLogado instanceof Aluno) {
+            return ((Aluno) usuarioLogado).getNome();
+        } else if (usuarioLogado instanceof Instrutor) {
+            return ((Instrutor) usuarioLogado).getNome();
+        } else if (usuarioLogado instanceof Administrador) {
+            return ((Administrador) usuarioLogado).getNome();
+        }
+        return "Desconhecido";
     }
 }
