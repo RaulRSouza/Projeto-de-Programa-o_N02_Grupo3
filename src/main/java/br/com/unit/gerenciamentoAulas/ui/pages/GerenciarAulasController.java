@@ -1,7 +1,14 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
+import java.awt.Desktop;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -17,15 +24,15 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarDTO;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.exceptions.AulaNotFoundException;
 import br.com.unit.gerenciamentoAulas.exceptions.BusinessException;
 import br.com.unit.gerenciamentoAulas.servicos.AulaService;
 import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
 import br.com.unit.gerenciamentoAulas.ui.SessionManager;
-import javafx.application.Platform;
 import javafx.animation.PauseTransition;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -41,7 +48,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
@@ -49,7 +55,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 @Controller
 public class GerenciarAulasController {
 
@@ -78,6 +83,7 @@ public class GerenciarAulasController {
     @FXML private TableColumn<AulaRow, Void> colAcoes;
     @FXML private Label lblTotal;
     @FXML private Label lblAlertasVisuais;
+    @FXML private TableColumn<AulaRow, Void> colMaterial;
 
     private final ObservableList<AulaRow> aulasData = FXCollections.observableArrayList();
     private PauseTransition alertaTimeout;
@@ -98,6 +104,34 @@ public class GerenciarAulasController {
         colVagas.setCellValueFactory(new PropertyValueFactory<>("vagas"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colAlertas.setCellValueFactory(data -> data.getValue().alertaProperty());
+
+        colMaterial.setCellFactory(param -> new TableCell<>() {
+            private final Button btnMaterial = new Button("📎");
+            
+            {
+                btnMaterial.getStyleClass().add("btn-action-edit");
+                btnMaterial.setOnAction(e -> {
+                    AulaRow row = getTableView().getItems().get(getIndex());
+                    handleAcessarMaterial(row);
+                });
+            }
+            
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    AulaRow row = getTableView().getItems().get(getIndex());
+                    if (row.hasMaterial()) {
+                        btnMaterial.setTooltip(new Tooltip("Acessar material complementar"));
+                        setGraphic(btnMaterial);
+                    } else {
+                        setGraphic(null);
+                    }
+                }
+            }
+        });
         colAlertas.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -249,6 +283,103 @@ public class GerenciarAulasController {
         }
     }
 
+    private void handleAcessarMaterial(AulaRow row) {
+        try {
+            Optional<MaterialComplementarDTO> materialOpt = aulaService.obterMaterialComplementar(row.getId());
+            
+            if (materialOpt.isEmpty()) {
+                mostrarInfo("Sem material", "Esta aula não possui material complementar.");
+                return;
+            }
+            
+            MaterialComplementarDTO material = materialOpt.get();
+            
+            // Se for um link
+            if (material.possuiLink()) {
+                String url = material.getUrl();
+                
+                // Validar se a URL não está vazia
+                if (url == null || url.trim().isEmpty()) {
+                    mostrarErro("Link inválido", "A URL do material está vazia ou inválida.");
+                    return;
+                }
+                
+                // Adicionar https:// se não tiver protocolo
+                if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                    url = "https://" + url;
+                }
+                
+                try {
+                    // Verificar se Desktop é suportado
+                    if (!Desktop.isDesktopSupported()) {
+                        mostrarErro("Não suportado", "Abertura de links não é suportada neste sistema.\n\nURL: " + url);
+                        return;
+                    }
+                    
+                    Desktop desktop = Desktop.getDesktop();
+                    if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+                        mostrarErro("Não suportado", "Abertura de navegador não é suportada.\n\nURL: " + url);
+                        return;
+                    }
+                    
+                    desktop.browse(new URI(url));
+                    mostrarAlertaVisual("Link aberto no navegador", ALERTA_SUCESSO_STYLE);
+                    
+                } catch (Exception e) {
+                    mostrarErro("Erro ao abrir link", 
+                        "Não foi possível abrir o link no navegador.\n\n" +
+                        "URL: " + url + "\n\n" +
+                        "Erro: " + e.getMessage() + "\n\n" +
+                        "Copie a URL e cole no seu navegador.");
+                    e.printStackTrace();
+                }
+            }
+            // Se for um arquivo
+            else if (material.possuiArquivo()) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Salvar Material");
+                
+                String nomeArquivo = material.obterNomeParaDownload();
+                if (nomeArquivo == null || nomeArquivo.trim().isEmpty()) {
+                    nomeArquivo = "material_aula_" + row.getId() + ".pdf";
+                }
+                fileChooser.setInitialFileName(nomeArquivo);
+                
+                // Definir extensão baseada no tipo
+                String tipo = material.getContentType() != null ? material.getContentType() : "application/pdf";
+                if (tipo.contains("pdf")) {
+                    fileChooser.getExtensionFilters().add(
+                        new FileChooser.ExtensionFilter("PDF Files", "*.pdf")
+                    );
+                } else {
+                    fileChooser.getExtensionFilters().add(
+                        new FileChooser.ExtensionFilter("All Files", "*.*")
+                    );
+                }
+                
+                File file = fileChooser.showSaveDialog(tabelaAulas.getScene().getWindow());
+                if (file != null) {
+                    try {
+                        Path destino = file.toPath();
+                        ByteArrayInputStream bis = new ByteArrayInputStream(material.getArquivo());
+                        Files.copy(bis, destino, StandardCopyOption.REPLACE_EXISTING);
+                        mostrarSucesso("Download concluído", "Arquivo salvo em: " + file.getAbsolutePath());
+                        mostrarAlertaVisual("Material baixado com sucesso", ALERTA_SUCESSO_STYLE);
+                    } catch (IOException e) {
+                        mostrarErro("Erro ao salvar", "Não foi possível salvar o arquivo: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                mostrarInfo("Material inválido", "O material complementar não possui link nem arquivo.");
+            }
+            
+        } catch (Exception e) {
+            mostrarErro("Erro ao acessar material", "Erro inesperado: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private void handleCancelar(AulaRow row) {
         try {
             Aula aula = aulaService.buscarPorId(row.getId());
@@ -328,19 +459,23 @@ public class GerenciarAulasController {
                 aula.getLocal() != null ? aula.getLocal().getId() : null);
 
         aulasData.clear();
-        aulas.forEach(aula -> aulasData.add(new AulaRow(
-                aula.getId(),
-                aula.getTitulo() != null ? aula.getTitulo() : "Sem título",
-                aula.getCurso().getNome(),
-                aula.getInstrutor().getNome(),
-                aula.getLocal().getNome(),
-                aula.getDataHoraInicio().format(FORMATTER),
-                aula.getDataHoraFim().format(FORMATTER),
-                aula.getVagasDisponiveis() + "/" + aula.getVagasTotais(),
-                aula.getStatus(),
-                conflitosInstrutor.contains(aula.getId()),
-                conflitosLocal.contains(aula.getId())
-        )));
+        aulas.forEach(aula -> {
+            boolean hasMaterial = aulaService.obterMaterialComplementar(aula.getId()).isPresent();
+            aulasData.add(new AulaRow(
+                    aula.getId(),
+                    aula.getTitulo() != null ? aula.getTitulo() : "Sem título",
+                    aula.getCurso().getNome(),
+                    aula.getInstrutor().getNome(),
+                    aula.getLocal().getNome(),
+                    aula.getDataHoraInicio().format(FORMATTER),
+                    aula.getDataHoraFim().format(FORMATTER),
+                    aula.getVagasDisponiveis() + "/" + aula.getVagasTotais(),
+                    aula.getStatus(),
+                    conflitosInstrutor.contains(aula.getId()),
+                    conflitosLocal.contains(aula.getId()),
+                    hasMaterial  // NOVO parâmetro
+            ));
+        });
         lblTotal.setText("Total: " + aulas.size() + " aula(s)");
     }
 
@@ -452,11 +587,12 @@ public class GerenciarAulasController {
         private final String status;
         private final boolean conflitoInstrutor;
         private final boolean conflitoLocal;
+        private final boolean hasMaterial;  // NOVO
         private final javafx.beans.property.SimpleStringProperty alertaProperty;
 
         public AulaRow(Long id, String titulo, String curso, String instrutor, String local,
-                      String dataInicio, String dataFim, String vagas, String status,
-                      boolean conflitoInstrutor, boolean conflitoLocal) {
+                    String dataInicio, String dataFim, String vagas, String status,
+                    boolean conflitoInstrutor, boolean conflitoLocal, boolean hasMaterial) {  // ATUALIZADO
             this.id = id;
             this.titulo = titulo;
             this.curso = curso;
@@ -468,6 +604,7 @@ public class GerenciarAulasController {
             this.status = status;
             this.conflitoInstrutor = conflitoInstrutor;
             this.conflitoLocal = conflitoLocal;
+            this.hasMaterial = hasMaterial;  // NOVO
             this.alertaProperty = new javafx.beans.property.SimpleStringProperty(gerarResumoAlertas());
         }
 
@@ -480,6 +617,7 @@ public class GerenciarAulasController {
         public String getDataFim() { return dataFim; }
         public String getVagas() { return vagas; }
         public String getStatus() { return status; }
+        public boolean hasMaterial() { return hasMaterial; }  // NOVO
 
         public boolean hasConflito() {
             return conflitoInstrutor || conflitoLocal;
