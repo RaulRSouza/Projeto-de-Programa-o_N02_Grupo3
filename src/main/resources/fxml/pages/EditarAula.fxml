@@ -7,7 +7,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="br.com.unit.gerenciamentoAulas.ui.pages.EditarAulaController"
-            prefWidth="620" prefHeight="700">
+            prefWidth="620" prefHeight="740">
 
     <center>
         <VBox spacing="18" style="-fx-background-color: #FFFFFF;">
@@ -72,6 +72,17 @@
                 <TextArea fx:id="observacoesArea" prefRowCount="3" wrapText="true"
                           promptText="Informações adicionais"
                           GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+                <Label text="Material (opcional)" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+                <VBox spacing="8" GridPane.rowIndex="9" GridPane.columnIndex="1">
+                    <Label text="Compartilhe um link ou suba um PDF com conteúdo complementar. Apenas um formato por vez." styleClass="text-muted" wrapText="true"/>
+                    <TextField fx:id="materialUrlField" promptText="https://exemplo.com/material" />
+                    <HBox spacing="8">
+                        <TextField fx:id="materialArquivoField" promptText="Nenhum arquivo selecionado" editable="false" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="selecionarMaterialButton" text="Selecionar PDF" onAction="#selecionarArquivoMaterial" styleClass="btn-secondary"/>
+                        <Button fx:id="limparMaterialButton" text="Limpar" onAction="#limparMaterialSelecionado"/>
+                    </HBox>
+                </VBox>
             </GridPane>
 
             <Separator/>
