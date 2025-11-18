@@ -1,11 +1,9 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
-import java.awt.Desktop;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -91,7 +89,11 @@ public class GerenciarAulasController {
             "-fx-text-fill: #166534; -fx-background-color: #dcfce7; -fx-padding: 6 12; -fx-background-radius: 6;";
     private static final String ALERTA_AVISO_STYLE =
             "-fx-text-fill: #92400e; -fx-background-color: #ffedd5; -fx-padding: 6 12; -fx-background-radius: 6;";
+    private javafx.application.HostServices hostServices;
 
+    public void setHostServices(javafx.application.HostServices hostServices) {
+    this.hostServices = hostServices;
+}
     @FXML
     public void initialize() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -254,15 +256,6 @@ public class GerenciarAulasController {
 
     private void handleEditar(AulaRow row) {
         try {
-            Aula aula = aulaService.buscarPorId(row.getId());
-            Long instrutorId = aula.getInstrutor() != null ? aula.getInstrutor().getId() : null;
-            
-            if (!sessionManager.podeEditarAula() && 
-                !sessionManager.podeEditarAulaDoInstrutor(instrutorId)) {
-                sessionManager.mostrarAcessoNegadoAulaNaoPropria();
-                return;
-            }
-            
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/pages/EditarAula.fxml"));
             loader.setControllerFactory(SpringContext.getSpringContext()::getBean);
             Parent root = loader.load();
@@ -310,28 +303,17 @@ public class GerenciarAulasController {
                 }
                 
                 try {
-                    // Verificar se Desktop é suportado
-                    if (!Desktop.isDesktopSupported()) {
-                        mostrarErro("Não suportado", "Abertura de links não é suportada neste sistema.\n\nURL: " + url);
-                        return;
+                    // Tentar usar HostServices primeiro (melhor para JavaFX)
+                    if (hostServices != null) {
+                        hostServices.showDocument(url);
+                        mostrarAlertaVisual("Link aberto no navegador", ALERTA_SUCESSO_STYLE);
+                    } else {
+                        // Fallback: tentar comando do sistema operacional
+                        abrirLinkComandoSistema(url);
                     }
-                    
-                    Desktop desktop = Desktop.getDesktop();
-                    if (!desktop.isSupported(Desktop.Action.BROWSE)) {
-                        mostrarErro("Não suportado", "Abertura de navegador não é suportada.\n\nURL: " + url);
-                        return;
-                    }
-                    
-                    desktop.browse(new URI(url));
-                    mostrarAlertaVisual("Link aberto no navegador", ALERTA_SUCESSO_STYLE);
                     
                 } catch (Exception e) {
-                    mostrarErro("Erro ao abrir link", 
-                        "Não foi possível abrir o link no navegador.\n\n" +
-                        "URL: " + url + "\n\n" +
-                        "Erro: " + e.getMessage() + "\n\n" +
-                        "Copie a URL e cole no seu navegador.");
-                    e.printStackTrace();
+                    mostrarErroComURL("Erro ao abrir link", url, e);
                 }
             }
             // Se for um arquivo
@@ -378,6 +360,53 @@ public class GerenciarAulasController {
             mostrarErro("Erro ao acessar material", "Erro inesperado: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void abrirLinkComandoSistema(String url) {
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            Runtime rt = Runtime.getRuntime();
+            
+            if (os.contains("win")) {
+                // Windows
+                rt.exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } else if (os.contains("mac")) {
+                // macOS
+                rt.exec("open " + url);
+            } else if (os.contains("nix") || os.contains("nux")) {
+                // Linux/Unix
+                rt.exec("xdg-open " + url);
+            } else {
+                throw new Exception("Sistema operacional não suportado");
+            }
+            mostrarAlertaVisual("Link aberto no navegador", ALERTA_SUCESSO_STYLE);
+        } catch (Exception e) {
+            mostrarErroComURL("Não foi possível abrir o link", url, e);
+        }
+    }
+
+    private void mostrarErroComURL(String titulo, String url, Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText("Copie a URL abaixo e cole no seu navegador:");
+        alert.setContentText(url);
+        
+        // Permitir seleção do texto
+        Label label = new Label(url);
+        label.setWrapText(true);
+        label.setStyle("-fx-font-family: monospace; -fx-background-color: #f0f0f0; -fx-padding: 10;");
+        
+        javafx.scene.control.TextArea textArea = new javafx.scene.control.TextArea(url);
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setPrefRowCount(3);
+        
+        alert.getDialogPane().setExpandableContent(textArea);
+        alert.getDialogPane().setExpanded(true);
+        
+        alert.showAndWait();
+        
+        e.printStackTrace();
     }
 
     private void handleCancelar(AulaRow row) {

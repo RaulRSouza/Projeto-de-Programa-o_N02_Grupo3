@@ -1,7 +1,9 @@
 package br.com.unit.gerenciamentoAulas.ui.pages;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +17,7 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import br.com.unit.gerenciamentoAulas.JavaFXApplication;
 import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarDTO;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
@@ -24,6 +27,7 @@ import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
 import br.com.unit.gerenciamentoAulas.servicos.AulaService;
+import javafx.application.HostServices;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -45,17 +49,15 @@ public class EditarAulaController {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final String DEFAULT_CONTENT_TYPE = "application/pdf";
 
-    @Autowired
-    private AulaService aulaService;
+    @Autowired private AulaService aulaService;
+    @Autowired private CursoRepository cursoRepository;
+    @Autowired private InstrutorRepository instrutorRepository;
+    @Autowired private LocalRepository localRepository;
 
     @Autowired
-    private CursoRepository cursoRepository;
-
-    @Autowired
-    private InstrutorRepository instrutorRepository;
-
-    @Autowired
-    private LocalRepository localRepository;
+    public void configureHostServices() {
+        this.hostServices = JavaFXApplication.getHost();
+    }
 
     @FXML private TextField tituloField;
     @FXML private TextArea descricaoArea;
@@ -77,18 +79,18 @@ public class EditarAulaController {
 
     private Long aulaId;
     private Aula aulaAtual;
+
     private byte[] arquivoMaterialSelecionado;
     private String arquivoMaterialNome;
     private String arquivoMaterialContentType = DEFAULT_CONTENT_TYPE;
+
+    private HostServices hostServices;
 
     @FXML
     public void initialize() {
         configurarComboBoxes();
         configurarSpinner();
         carregarDadosAuxiliares();
-        if (materialArquivoField != null) {
-            materialArquivoField.setEditable(false);
-        }
     }
 
     public void setAulaId(Long aulaId) {
@@ -96,49 +98,53 @@ public class EditarAulaController {
         carregarAulaSelecionada();
     }
 
+    // ---------- ABRIR LINKS ----------
+    public void abrirLink(String url) {
+        try {
+            if (hostServices != null) {
+                hostServices.showDocument(url);
+                return;
+            }
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI(url));
+                return;
+            }
+
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec(new String[]{"open", url});
+            } else {
+                Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+            }
+
+        } catch (Exception e) {
+            mostrarAlerta("Erro", "Não foi possível abrir o link:\n" + url, Alert.AlertType.ERROR);
+        }
+    }
+
+    // ---------- SALVAR ALTERAÇÕES ----------
     @FXML
     private void salvarAlteracoes() {
         try {
-            if (!validarCampos() || aulaId == null) {
-                return;
-            }
+            if (!validarCampos() || aulaId == null) return;
 
             Curso curso = cursoComboBox.getValue();
             Instrutor instrutor = instrutorComboBox.getValue();
             Local local = localComboBox.getValue();
 
-            LocalDateTime inicio = combinarDataHora(
-                dataInicioPicker.getValue(),
-                horaInicioField.getText().trim()
-            );
-            LocalDateTime fim = combinarDataHora(
-                dataFimPicker.getValue(),
-                horaFimField.getText().trim()
-            );
+            LocalDateTime inicio = combinarDataHora(dataInicioPicker.getValue(), horaInicioField.getText().trim());
+            LocalDateTime fim = combinarDataHora(dataFimPicker.getValue(), horaFimField.getText().trim());
 
             if (!fim.isAfter(inicio)) {
-                mostrarAlerta("Validação",
-                        "A data/hora de término deve ser posterior ao início.",
-                        Alert.AlertType.WARNING);
+                mostrarAlerta("Validação", "A data/hora de término deve ser posterior ao início.", Alert.AlertType.WARNING);
                 return;
             }
 
             vagasSpinner.increment(0);
-            Integer vagasValor = vagasSpinner.getValue();
-            int vagasTotais = vagasValor != null ? vagasValor : 0;
-
-            String observacoes = observacoesArea.getText() != null
-                    ? observacoesArea.getText().trim()
-                    : "";
-
-            String titulo = tituloField.getText().trim();
-            String descricao = descricaoArea.getText() != null
-                    ? descricaoArea.getText().trim()
-                    : "";
-
-            if (!validarMaterialCampos()) {
-                return;
-            }
+            int vagasTotais = vagasSpinner.getValue();
 
             aulaService.editarAula(
                 aulaId,
@@ -148,13 +154,13 @@ public class EditarAulaController {
                 inicio,
                 fim,
                 vagasTotais,
-                observacoes,
-                titulo,
-                descricao
+                observacoesArea.getText() != null ? observacoesArea.getText().trim() : "",
+                tituloField.getText().trim(),
+                descricaoArea.getText() != null ? descricaoArea.getText().trim() : ""
             );
 
             if (possuiMaterialInformado()) {
-                MaterialComplementarDTO materialDTO = construirMaterialDTO(aulaId, titulo);
+                MaterialComplementarDTO materialDTO = construirMaterialDTO(aulaId, tituloField.getText());
                 aulaService.salvarMaterialComplementar(aulaId, materialDTO);
             }
 
@@ -172,33 +178,31 @@ public class EditarAulaController {
         fecharJanela();
     }
 
+    // ---------- SELEÇÃO DE ARQUIVO ----------
     @FXML
     private void selecionarArquivoMaterial() {
         try {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Selecionar material complementar (PDF)");
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Arquivos PDF (*.pdf)", "*.pdf"));
-            Window owner = selecionarMaterialButton != null ? selecionarMaterialButton.getScene().getWindow() : null;
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Arquivos PDF (*.pdf)", "*.pdf"));
+
+            Window owner = selecionarMaterialButton.getScene().getWindow();
             File arquivo = fileChooser.showOpenDialog(owner);
-            if (arquivo == null) {
-                return;
-            }
+            if (arquivo == null) return;
+
             byte[] conteudo = Files.readAllBytes(arquivo.toPath());
             if (conteudo.length == 0) {
                 mostrarAlerta("Arquivo inválido", "O arquivo selecionado está vazio.", Alert.AlertType.WARNING);
                 return;
             }
+
             arquivoMaterialSelecionado = conteudo;
             arquivoMaterialNome = arquivo.getName();
-            String contentType = Files.probeContentType(arquivo.toPath());
-            arquivoMaterialContentType = contentType != null ? contentType : DEFAULT_CONTENT_TYPE;
-            if (materialArquivoField != null) {
-                materialArquivoField.setText(arquivoMaterialNome);
-            }
-            if (materialUrlField != null) {
-                materialUrlField.clear();
-            }
+            arquivoMaterialContentType = Files.probeContentType(arquivo.toPath());
+
+            materialArquivoField.setText(arquivoMaterialNome);
+            materialUrlField.clear();
+
         } catch (IOException e) {
             mostrarAlerta("Erro", "Não foi possível ler o arquivo selecionado.", Alert.AlertType.ERROR);
         }
@@ -209,11 +213,10 @@ public class EditarAulaController {
         arquivoMaterialSelecionado = null;
         arquivoMaterialNome = null;
         arquivoMaterialContentType = DEFAULT_CONTENT_TYPE;
-        if (materialArquivoField != null) {
-            materialArquivoField.clear();
-        }
+        materialArquivoField.clear();
     }
 
+    // ---------- CARREGAMENTO DA AULA ----------
     private void carregarDadosAuxiliares() {
         cursoComboBox.setItems(FXCollections.observableArrayList(
             cursoRepository.findAll().stream()
@@ -235,9 +238,7 @@ public class EditarAulaController {
     }
 
     private void carregarAulaSelecionada() {
-        if (aulaId == null) {
-            return;
-        }
+        if (aulaId == null) return;
 
         aulaAtual = aulaService.buscarPorId(aulaId);
 
@@ -271,16 +272,14 @@ public class EditarAulaController {
 
     private void carregarMaterialExistente() {
         Optional<MaterialComplementarDTO> materialOpt = aulaService.obterMaterialComplementar(aulaId);
-        
-        if (materialOpt.isPresent()) {
-            MaterialComplementarDTO material = materialOpt.get();
-            
+
+        materialOpt.ifPresent(material -> {
             if (material.possuiLink()) {
                 materialUrlField.setText(material.getUrl());
             } else if (material.possuiArquivo()) {
                 materialArquivoField.setText(material.getNomeArquivo());
             }
-        }
+        });
     }
 
     private <T> void selecionarValor(ComboBox<T> comboBox, T valor) {
@@ -306,7 +305,6 @@ public class EditarAulaController {
             public String toString(T object) {
                 return object == null ? "" : labelProvider.apply(object);
             }
-
             @Override
             public T fromString(String string) {
                 return null;
@@ -351,59 +349,50 @@ public class EditarAulaController {
             return false;
         }
         if (!validarHora(horaInicioField.getText()) || !validarHora(horaFimField.getText())) {
-            mostrarAlerta("Validação", "Informe horários válidos no formato HH:mm.", Alert.AlertType.WARNING);
+            mostrarAlerta("Validação", "Horário inválido! Formato correto: HH:mm", Alert.AlertType.WARNING);
             return false;
         }
         if (vagasSpinner.getValue() == null || vagasSpinner.getValue() <= 0) {
-            mostrarAlerta("Validação", "Informe um número de vagas maior que zero.", Alert.AlertType.WARNING);
+            mostrarAlerta("Validação", "Informe vagas maiores que zero.", Alert.AlertType.WARNING);
             return false;
         }
         return true;
     }
 
     private boolean validarMaterialCampos() {
-        String url = materialUrlField != null && materialUrlField.getText() != null
-                ? materialUrlField.getText().trim()
-                : "";
+        String url = materialUrlField.getText().trim();
         boolean possuiUrl = !url.isBlank();
-        boolean possuiArquivo = arquivoMaterialSelecionado != null && arquivoMaterialSelecionado.length > 0;
+        boolean possuiArquivo = arquivoMaterialSelecionado != null;
 
         if (possuiUrl && possuiArquivo) {
-            mostrarAlerta("Validação", "Informe apenas URL ou apenas o arquivo do material.", Alert.AlertType.WARNING);
-            return false;
-        }
-        if (possuiArquivo && (arquivoMaterialNome == null || arquivoMaterialNome.isBlank())) {
-            mostrarAlerta("Validação", "Selecione um arquivo válido para o material.", Alert.AlertType.WARNING);
+            mostrarAlerta("Validação", "Use apenas URL ou apenas arquivo.", Alert.AlertType.WARNING);
             return false;
         }
         return true;
     }
 
     private boolean possuiMaterialInformado() {
-        String url = materialUrlField != null && materialUrlField.getText() != null
-                ? materialUrlField.getText().trim()
-                : "";
-        boolean possuiUrl = !url.isBlank();
-        boolean possuiArquivo = arquivoMaterialSelecionado != null && arquivoMaterialSelecionado.length > 0;
-        return possuiUrl || possuiArquivo;
+        return !materialUrlField.getText().trim().isBlank()
+            || arquivoMaterialSelecionado != null;
     }
 
     private MaterialComplementarDTO construirMaterialDTO(Long aulaId, String tituloAula) {
-        String tituloMaterial = tituloAula != null && !tituloAula.isBlank()
-                ? tituloAula + " - Material"
-                : "Material complementar";
-        String url = materialUrlField != null && materialUrlField.getText() != null
-                ? materialUrlField.getText().trim()
-                : "";
-        if (!url.isBlank()) {
-            return MaterialComplementarDTO.criarLink(aulaId, tituloMaterial, url);
-        }
-        return MaterialComplementarDTO.criarArquivo(
+        String tituloMaterial = tituloAula + " - Material";
+
+        if (!materialUrlField.getText().trim().isBlank()) {
+            return MaterialComplementarDTO.criarLink(
                 aulaId,
                 tituloMaterial,
-                arquivoMaterialNome,
-                arquivoMaterialContentType,
-                arquivoMaterialSelecionado
+                materialUrlField.getText().trim()
+            );
+        }
+
+        return MaterialComplementarDTO.criarArquivo(
+            aulaId,
+            tituloMaterial,
+            arquivoMaterialNome,
+            arquivoMaterialContentType,
+            arquivoMaterialSelecionado
         );
     }
 
@@ -417,8 +406,7 @@ public class EditarAulaController {
     }
 
     private LocalDateTime combinarDataHora(LocalDate data, String horaTexto) {
-        LocalTime hora = LocalTime.parse(horaTexto, TIME_FORMATTER);
-        return LocalDateTime.of(data, hora);
+        return LocalDateTime.of(data, LocalTime.parse(horaTexto, TIME_FORMATTER));
     }
 
     private void mostrarAlerta(String titulo, String mensagem, Alert.AlertType tipo) {

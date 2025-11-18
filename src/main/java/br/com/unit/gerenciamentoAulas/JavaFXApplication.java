@@ -4,6 +4,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,9 +17,12 @@ import javafx.stage.Stage;
 public class JavaFXApplication extends Application {
 
     private ConfigurableApplicationContext context;
+    private static HostServices hostServices;
+
 
     @Override
     public void init() {
+        hostServices = getHostServices();
         this.context = new SpringApplicationBuilder()
                 .sources(ProjetoDeProgramacaoN02Grupo3Application.class)
                 .run();
@@ -54,6 +58,11 @@ public class JavaFXApplication extends Application {
             context.close();
         }
         Platform.exit();
+    }
+
+
+    public static HostServices getHost() {
+        return hostServices;
     }
 
     public static void main(String[] args) {

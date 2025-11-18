@@ -25,22 +25,22 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import br.com.unit.gerenciamentoAulas.dtos.ReagendamentoRequest;
 import br.com.unit.gerenciamentoAulas.dtos.MaterialComplementarLinkRequest;
+import br.com.unit.gerenciamentoAulas.dtos.ReagendamentoRequest;
+import br.com.unit.gerenciamentoAulas.entidades.AcaoSistema;
 import br.com.unit.gerenciamentoAulas.entidades.Aula;
 import br.com.unit.gerenciamentoAulas.entidades.Curso;
 import br.com.unit.gerenciamentoAulas.entidades.Instrutor;
 import br.com.unit.gerenciamentoAulas.entidades.Local;
+import br.com.unit.gerenciamentoAulas.entidades.Usuario;
 import br.com.unit.gerenciamentoAulas.repositories.AulaRepository;
 import br.com.unit.gerenciamentoAulas.repositories.CursoRepository;
 import br.com.unit.gerenciamentoAulas.repositories.InstrutorRepository;
 import br.com.unit.gerenciamentoAulas.repositories.LocalRepository;
-import br.com.unit.gerenciamentoAulas.servicos.NotificacaoService;
-import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
-import br.com.unit.gerenciamentoAulas.servicos.AuditoriaService;
-import br.com.unit.gerenciamentoAulas.entidades.Usuario;
-import br.com.unit.gerenciamentoAulas.entidades.AcaoSistema;
 import br.com.unit.gerenciamentoAulas.repositories.UsuarioRepository;
+import br.com.unit.gerenciamentoAulas.servicos.AuditoriaService;
+import br.com.unit.gerenciamentoAulas.servicos.CsvExportService;
+import br.com.unit.gerenciamentoAulas.servicos.NotificacaoService;
 
 @RestController
 @RequestMapping("/api/aulas")
